@@ -31,7 +31,7 @@ window.GAME = {
     tagline: "Look after the little glowing critters!",
     saveKey: "starter-nursery",
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v46",
+    assetVersion: "v1",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: false,                 // minimal demo: no economy
     namePrompt: { label: "Name your nursery:", placeholder: "Starlight Bay" },
