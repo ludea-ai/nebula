@@ -33,7 +33,7 @@ window.GAME = {
     tagline: "Look after the little glowing critters!",
     saveKey: "nebula-nursery",
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v58",
+    assetVersion: "v59",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: true,
     coinIcon: "shard",                // the currency: star shards
@@ -463,7 +463,7 @@ window.GAME = {
   /* ---- Deliveries: pick a crate up, bring it to a ground target. Rare cargo → drones chase you ---- */
   missions: {
     title: "{i:crate} Delivery Dock", subtitle: "Pick a delivery:",
-    stat: "jobs", radius: 80, color: "#6ef0a0", marker: "crate", markerScale: 1,
+    stat: "jobs", radius: 80, color: "#6ef0a0", marker: "crate", markerScale: 0.6,
     offers: [
       { label: "Easy delivery", sub: "Fetch the crate, drop it on the target: {i:shard} 15", icon: "crate", pay: 15 },
       { label: "Express parcel", sub: "{i:shard} 25 — one drone will try to snatch it {i:drone}", icon: "crate", pay: 25, heat: 1 },
