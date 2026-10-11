@@ -20,7 +20,7 @@ Whenever the engine gains a capability, **add it to Nebula too** (it must show e
 
 **Ludea organisation** (https://github.com/ludea-ai, see §11): `game-engine` = the GitHub template
 (engine + small starter game) · `nebula` = the showcase, where engine work is developed then synced
-to every repo · `ludea.ai` = the brand site + games catalogue · the games. Live at `https://ludea.ai/<repo>/`.
+to every repo · `ludea-ai.github.io` = the brand site + games catalogue · the games. Live at `https://ludea.ai/<repo>/`.
 
 ## 2. Golden rule
 - **`engine.js` is generic — never put game content in it.** All game data, strings,
@@ -45,7 +45,7 @@ to every repo · `ludea.ai` = the brand site + games catalogue · the games. Liv
 - `tools/art/<game>.cjs` — ALL the game's art as parametric SVG, rendered to PNG by
   `node .claude/skills/_shared/render-svg.cjs tools/art/<game>.cjs [--only key]`.
   Never hand-edit the PNGs: change the art module and re-render.
-- The Ludea site (landing, games catalogue, brand) lives in its own repo `ludea-ai/ludea.ai` —
+- The Ludea site (landing, games catalogue, brand) lives in its own repo `ludea-ai/ludea-ai.github.io` —
   **when a game is added or gains a mode, update its catalogue card there.**
 - `.github/workflows/deploy.yml` — GitHub Pages deploy.
 - Cache-busting: `assetVersion: "vN"` in `game.config.js` (used by `av()` for every
@@ -199,24 +199,23 @@ like a game made by a studio — not a prototype. Concretely:
   "iPhone 13"): pageErrors [], errors []; `i18n-extract.cjs --to fr --check`; separation-audit.
 
 ## 11. Ludea organisation (restructured Oct 2026)
-Layout in https://github.com/ludea-ai (every repo is served at `https://ludea.ai/<repo>/` once the
-org site repo carries the custom domain — see the open items):
+Layout in https://github.com/ludea-ai (every repo is served at `https://ludea.ai/<repo>/` — see the domain state below):
 - **`game-engine`** — the GitHub template: engine layer + a SMALL starter game (`game.config.js` =
   `.claude/skills/new-game/references/minimal-seed.config.js`, art in `tools/art/starter.cjs`).
   Publishes nothing (no Pages deploy). "Use this template" gives exactly that.
 - **`nebula`** — the full showcase (https://ludea.ai/nebula/). Engine work is developed and
   probe-tested here (it exercises every system), then synced (`sync-engine`) into the template
   and every game. Every new engine capability is shown in Nebula.
-- **`ludea.ai`** — the brand site (https://ludea.ai/): landing EN at `/`, FR at `/fr/`, design
+- **`ludea-ai.github.io`** — the brand site (https://ludea.ai/): landing EN at `/`, FR at `/fr/`, design
   system at `/design/`, games catalogue, all Ludea brand art (`tools/art/brand.cjs`). When a game
   is added or gains a mode, update its catalogue card there.
 - Games: `dr-smile`, `gta7`, `my-little-stable`.
 - The engine layer (engine.js, engine.css, ENGINE.md, vendor/, .claude/skills) is identical in every
   repo. Old `jlrigau.github.io/…` addresses are gone (repos transferred); saves were not migrated
   (owner: fine). Later (not now): load the engine from one place instead of copying it.
-- Open items for the OWNER (GitHub/DNS settings, not doable from a session): the org site repo is
-  named `ludea.ai` — GitHub only lets the other repos inherit the domain (ludea.ai/<repo>/) when the
-  org site repo is named **`ludea-ai.github.io`**: rename it (Settings → General), keep the custom
-  domain ludea.ai on it ONLY (never per repo). DNS (Namecheap): delete the leftover record pointing
-  to 162.255.119.235, add `www` CNAME → ludea-ai.github.io, optionally the 4 AAAA
-  (2606:50c0:800{0,1,2,3}::153); then Pages → "Enforce HTTPS".
+- Domain state (2026-10-11): org site repo renamed to `ludea-ai.github.io` with the custom domain
+  ludea.ai (set there ONLY, never per repo); DNS cleaned (4 GitHub A records, `www` CNAME →
+  ludea-ai.github.io). Pending on GitHub's side: the HTTPS certificate ("Enforce HTTPS" still
+  unavailable) — until it is issued, http://ludea.ai/ works but ludea.ai/<repo>/ redirects to https
+  and fails; games stay playable at https://ludea-ai.github.io/<repo>/. If it stays stuck: Settings →
+  Pages → Remove the domain, re-add `ludea.ai`, wait, then tick "Enforce HTTPS".

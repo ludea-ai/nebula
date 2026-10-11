@@ -71,7 +71,7 @@ section by section:
 - `environment` (band + arena + trail loop + forest scatter) if used; else drop it
 - `objectives.levels` (gamification), `help`
 Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
-Once the game is live, add its card to the Ludea site's catalogue (repo `ludea-ai/ludea.ai`:
+Once the game is live, add its card to the Ludea site's catalogue (repo `ludea-ai/ludea-ai.github.io`:
 `src/index.html` + a 390×844 screenshot in `shots/` + its app icon in `icons/` + a QR code, then
 `node build.cjs`).
 
