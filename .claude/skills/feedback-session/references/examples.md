@@ -1,7 +1,7 @@
 # Feedback → action → confirmation examples
 
 To calibrate the tone and chaining. The technical **how** stays invisible to the
-person giving feedback. Match the wording to the audience (a child, a client…).
+person giving feedback. Match the wording to the audience (a child, an adult player…).
 
 | Feedback (plain words) | Type | Pipeline | Confirmation (plain words) |
 | --- | --- | --- | --- |

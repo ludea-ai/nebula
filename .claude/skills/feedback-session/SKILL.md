@@ -1,6 +1,6 @@
 ---
 name: feedback-session
-description: "Feedback session" mode where a NON-TECHNICAL person (a child, a client, a playtester) drives changes to a game built on this engine from their feedback, with NO technical questions. Enter when the user says e.g. "my daughter will give feedback" / "start a playtest session" / "the client has feedback"; exit with "we're done with feedback". Classifies each item (bug or idea), clarifies only the functional side in plain words, chains the other skills automatically, and confirms simply. Triggers: "feedback session", "they have feedback to give", "we're done with feedback".
+description: "Feedback session" mode where a NON-TECHNICAL person (a player — the game's creator or the people they made it for, even children) drives changes to a game built on this engine from their feedback, with NO technical questions. Enter when the user says e.g. "my daughter will give feedback" / "start a playtest session" / "the players have feedback"; exit with "we're done with feedback". Classifies each item (bug or idea), clarifies only the functional side in plain words, chains the other skills automatically, and confirms simply. Triggers: "feedback session", "they have feedback to give", "we're done with feedback".
 ---
 
 # feedback-session ⭐ (orchestrator)
