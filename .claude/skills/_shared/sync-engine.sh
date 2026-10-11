@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# sync-engine — backport the ENGINE LAYER from a game repo INTO the template.
+# sync-engine — copy the ENGINE LAYER from a source repo (where it evolved: the showcase,
+# or a game) INTO this repo (the template, the showcase or a game).
 #
 # A template-generated game shares NO git history with the template, so this can't be a
 # merge. But the engine layer is a known set of files with NO game content (proven by
@@ -8,7 +9,7 @@
 # Pulls ONLY: engine.js, engine.css, ENGINE.md, .claude/skills/ (incl. _shared tooling).
 # Never touches game content: game.config.js, assets/, index.html, style.css,
 # manifest.webmanifest, README.md, tools/, .claude/settings*.json.
-# Does NOT commit — you review the diff, then commit. Run from the TEMPLATE repo root.
+# Does NOT commit — you review the diff, then commit. Run from the TARGET repo root.
 #
 #   bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote-name> [ref]
 set -euo pipefail
@@ -46,9 +47,9 @@ Engine layer staged. Next:
   1. Review:  git status   &&   git diff --cached
   2. Game files were intentionally NOT touched (config/assets/index.html/style.css/
      manifest/README/tools). Merge CLAUDE.md conventions by hand if they changed.
-  3. Consider upgrading the demo to exercise any new flagship capability (e.g. a
-     close-up loop) — that's game content, authored here in the template, not pulled.
-  4. Verify on the demo:  bash .claude/skills/_shared/serve.sh
+  3. In the showcase, upgrade its config to exercise any new flagship capability —
+     that's game content, authored there, not pulled.
+  4. Verify on this repo's game:  bash .claude/skills/_shared/serve.sh
        node .claude/skills/_shared/playtest.cjs            # + --engine webkit for touch
   5. Commit.
 NEXT

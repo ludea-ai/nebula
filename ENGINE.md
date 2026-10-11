@@ -2,11 +2,12 @@
 
 The engine (`engine.js`) is **data-driven** and contains no game content. A game is a
 single global object `window.GAME` defined in `game.config.js`, plus its assets. This
-file documents every field and the engine capabilities they drive. The shipped
-`game.config.js` ("Nebula Nursery") is the **showcase**: it turns on nearly every system
-below, so it is the working example of how each one is wired. Every system is optional —
-a new game starts small from `.claude/skills/new-game/references/minimal-seed.config.js`
-and adds systems as it iterates.
+file documents every field and the engine capabilities they drive. The showcase game
+**Nebula Nursery** (its own repo: https://github.com/ludea-ai/nebula) turns on nearly every
+system below, so its `game.config.js` is the working example of how each one is wired. Every
+system is optional — a new game starts small from
+`.claude/skills/new-game/references/minimal-seed.config.js` (the template's starter game) and
+adds systems as it iterates.
 
 > Load order in `index.html`: `engine.css` → `style.css` (theme) → `vendor/phaser.min.js` →
 > `game.config.js` → `engine.js`.

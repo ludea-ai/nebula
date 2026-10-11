@@ -1,7 +1,8 @@
 /* =========================================================
    MINIMAL SEED — the starting point of a new game (new-game skill)
-   (the original small "Nebula Nursery"; the shipped demo is now
-   the FULL showcase — start new games from THIS file instead)
+   It is also the template's starter game.config.js (a mini
+   "Nebula Nursery"; the FULL showcase lives in its own repo,
+   github.com/ludea-ai/nebula — start new games from THIS file)
    ---------------------------------------------------------
    This file is the ENTIRE game: data + asset references.
    The engine (engine.js) contains no game content; it reads
@@ -15,7 +16,7 @@
 
    Theme: a tiny space nursery where a keeper robot looks
    after glowing alien critters. All art is generated from
-   tools/art/nebula.cjs (SVG → PNG, CC0).
+   tools/art/starter.cjs (SVG → PNG, CC0).
    ========================================================= */
 
 window.GAME = {
@@ -28,7 +29,7 @@ window.GAME = {
     splash: "assets/img/splash.webp",   // full-screen illustration behind the home & create screens
     shortName: "Nebula",
     tagline: "Look after the little glowing critters!",
-    saveKey: "nebula-nursery",
+    saveKey: "starter-nursery",
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
     assetVersion: "v46",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
@@ -51,7 +52,7 @@ window.GAME = {
     idleHint: "Tap a critter to look after it",
   },
 
-  /* ---- Illustrated UI icons (tools/art/nebula.cjs → assets/ui/icons). Any text can embed {i:key}. ---- */
+  /* ---- Illustrated UI icons (tools/art/starter.cjs → assets/ui/icons). Any text can embed {i:key}. ---- */
   icons: {
     star: "assets/ui/icons/star.webp", heart: "assets/ui/icons/heart.webp", heartEmpty: "assets/ui/icons/heartEmpty.webp", sound: "assets/ui/icons/sound.webp",
     soundOff: "assets/ui/icons/soundOff.webp", help: "assets/ui/icons/help.webp", avatar: "assets/ui/icons/avatar.webp", goals: "assets/ui/icons/goals.webp",

@@ -19,10 +19,11 @@ riding/obstacles, breeding, decorations, trail loops OFF until the user asks. Us
 engine stays fully capable — you're choosing what to enable, not removing anything.
 
 **Two references, two roles:** `references/minimal-seed.config.js` is the small seed to
-START from (one pen, 3 needs, 4 actions, one rest station, one level). The shipped demo
-`game.config.js` (Nebula Nursery) is the **full showcase** that turns on every engine
-system — read it to see how a feature is wired when the user later asks for it, but never
-copy it whole into a new game.
+START from (one pen, 3 needs, 4 actions, one rest station, one level) — it is also the
+`game.config.js` of the template's starter game, with its art in `tools/art/starter.cjs`.
+The showcase **Nebula Nursery** lives in its own repo (https://github.com/ludea-ai/nebula):
+it turns on every engine system — read its `game.config.js` / `tools/art/nebula.cjs` to see
+how a feature is wired when the user later asks for it, but never copy it whole into a new game.
 
 ## Step 1 — Interview (AskUserQuestion)
 Ask only what changes the output. Bundle into 1–2 `AskUserQuestion` calls:
@@ -31,9 +32,9 @@ Ask only what changes the output. Bundle into 1–2 `AskUserQuestion` calls:
 - **Target audience / age**: e.g. "young kids (6–8)", "kids (9–11)", "teens", "all
   ages", "adults". → sets `GAME.meta.audience` and the content-suitability bar used by
   **asset-search** (`references/content-policy.md`).
-- **Art style**: smooth cartoon vector art generated from SVG (default — see the demo's
-  `tools/art/nebula.cjs`), or pixel-art (`render.pixelArt:true`).
-- **Language**: the source language of the texts (`meta.lang`; the demo ships English). Every
+- **Art style**: smooth cartoon vector art generated from SVG (default — see the starter's
+  `tools/art/starter.cjs`), or pixel-art (`render.pixelArt:true`).
+- **Language**: the source language of the texts (`meta.lang`; the starter ships English). Every
   game is bilingual French / English by default: also generate `game.i18n.js` for the other one
   (`node .claude/skills/_shared/i18n-extract.cjs --to <lang>`, fill every value, `--check` passes;
   in a non-English game also `--to <meta.lang>` for the engine's English fallbacks).
@@ -58,7 +59,7 @@ over-ask. Bias toward the smallest playable game.
 
 ## Step 2 — Author `game.config.js`
 Write a new `game.config.js` (the **whole** game) following the schema in **`ENGINE.md`**.
-Start from `references/minimal-seed.config.js` (NOT the full showcase demo) and replace,
+Start from `references/minimal-seed.config.js` (NOT the full showcase) and replace,
 section by section:
 - `meta` (title, icons, logo, save key, theme colours, **audience**, UI strings incl.
   `meta.strings` for engine labels, language)
@@ -70,15 +71,15 @@ section by section:
 - `environment` (band + arena + trail loop + forest scatter) if used; else drop it
 - `objectives.levels` (gamification), `help`
 Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
-Delete the template's `landing/` folder (the engine's landing page + catalogue belongs to the
-template; `deploy.yml` never publishes it from a game repo anyway). Once the game is live, add its
-card to the TEMPLATE's `landing/index.html` catalogue (+ 390×844 screenshots in `landing/shots/`).
+Once the game is live, add its card to the Ludea site's catalogue (repo `ludea-ai/ludea.ai`:
+`src/index.html` + a 390×844 screenshot in `shots/` + its app icon in `icons/` + a QR code, then
+`node build.cjs`).
 
 ## Step 3 — Assets
 - **Reuse** the generic environment assets already in `assets/` when they fit
   (ground, trees, bushes, fences, buildings).
-- **New themed assets — generate them**: write `tools/art/<game>.cjs` (copy the demo's
-  `tools/art/nebula.cjs` structure: one parametric function per thing — character,
+- **New themed assets — generate them**: write `tools/art/<game>.cjs` (copy the starter's
+  `tools/art/starter.cjs` structure: one parametric function per thing — character,
   creature, props, close-up backdrop, icon) and render with
   `node .claude/skills/_shared/render-svg.cjs tools/art/<game>.cjs`. Fully original, no
   licensing, crisp on phones. Always look at a contact sheet of the renders before wiring
@@ -123,12 +124,16 @@ The repo ships a README describing the **engine/template**. Rewrite its **top** 
 with the game you just created, and **keep all the technical/template content below**
 (how the template works, iterating, the link to `ENGINE.md`). Concretely:
 1. **Derive the live URL from the repo's own remote** (GitHub Pages serves the default
-   branch — so the link is reconstructed from the repo itself, no guessing):
+   branch — so the link is reconstructed from the repo itself, no guessing). If the owner's
+   Pages site has a custom domain (Ludea: every `ludea-ai` repo is served at
+   `https://ludea.ai/<repo>/`), `github.io` redirects to it — follow the redirect:
    ```bash
    url=$(git remote get-url origin)
    slug=$(echo "$url" | sed -E 's#.*[/:]([^/]+/[^/]+?)(\.git)?/?$#\1#')
    owner=${slug%%/*}; repo=${slug##*/}
-   echo "https://$owner.github.io/$repo/"
+   gh="https://$owner.github.io/$repo/"
+   curl -s -o /dev/null -w '%{redirect_url}\n' "$gh"   # non-empty → the custom-domain URL to use
+   echo "$gh"
    ```
 2. **Replace the engine intro** (the template's `# …` title + tagline + old "Play the
    demo" line) with a **game header** built from `meta`: `# <titleIcon> <title>`, the

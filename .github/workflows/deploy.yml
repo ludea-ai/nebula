@@ -34,12 +34,6 @@ jobs:
           # first deploy doesn't fail with "Get Pages site failed".
           enablement: true
 
-      # The engine's landing page (landing/) is published by the TEMPLATE repo only.
-      # A game created from the template is not a template repo: it publishes the game alone.
-      - name: Games publish only the game
-        if: ${{ !github.event.repository.is_template }}
-        run: rm -rf landing
-
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
