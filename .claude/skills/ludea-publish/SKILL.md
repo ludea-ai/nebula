@@ -1,14 +1,27 @@
 ---
 name: ludea-publish
-description: The creator asks to publish their game in the Ludea catalogue (https://ludea.ai/). Checks the game is ready and safe for children (catalogue fields, age, description, French + English, icons, credits, no tracker / external link / data collection, no errors, engine changes reported), fixes what can be fixed with them, then files a publication request on ludea-ai/ludea-ai.github.io for the Ludea review. Triggers: "/ludea-publish", "publish my game on Ludea", "put my game in the catalogue", "submit my game", "je veux que mon jeu soit sur ludea.ai".
+description: The creator asks to publish their game in the Ludea catalogue (https://ludea.ai/) — or to send an UPDATE of a game already published there. Checks the game is ready and safe for children (catalogue fields, age, description, French + English, icons, credits, no tracker / external link / data collection, no errors, engine changes reported), fixes what can be fixed with them, then files a publication request on ludea-ai/ludea-ai.github.io for the Ludea review. Triggers: "/ludea-publish", "publish my game on Ludea", "update my game in the catalogue", "envoie la mise à jour sur ludea.ai", "put my game in the catalogue", "submit my game", "je veux que mon jeu soit sur ludea.ai".
 ---
 
-# ludea-publish (creator → Ludea catalogue)
+# ludea-publish (creator → Ludea catalogue: first publication OR update)
 
 The game stays in the creator's repo. Publishing asks Ludea to **review** it and, once
 accepted, to **copy (fork) it into the `ludea-ai` organisation** — the catalogue serves that
 reviewed copy at `https://ludea.ai/<game>/`, so nothing un-reviewed ever reaches children.
 Later updates are re-submitted the same way and re-reviewed.
+
+## 0. First publication or update?
+Look the game up in the catalogue registry
+(`https://raw.githubusercontent.com/ludea-ai/ludea-ai.github.io/main/catalogue.json`, entry whose
+`source` = this repo). `update-check.cjs` also says it at session start (« published version is behind »).
+- **Not there → first publication** (all steps below).
+- **There → update**: same steps, plus: list what changed **for the players** since the published
+  version (`git log <reviewedCommit>..HEAD -- game.config.js game.i18n.js index.html style.css
+  manifest.webmanifest assets tools`, rewritten in plain words: new things, changed things, fixes);
+  new screenshots if something visible changed; updated catalogue description only if the game
+  gained a mode. Nothing changed for players → say so and don't send.
+- A request already open for this game → don't open a second one: comment on it with the new
+  commit (the review restarts on that commit).
 
 ## 1. Readiness check (silent)
 ```bash
@@ -38,9 +51,10 @@ Plus the game's usual QA (they must be green before submitting):
 ## 3. File the request (public issue on `ludea-ai/ludea-ai.github.io`)
 Write it in **English** (all Ludea issues are), except the catalogue description, which is given
 in both English and French (the catalogue is bilingual).
-Title: `[publish] <Game title> — <owner/repo>`. Body:
+Title: `[publish] <Game title> — <owner/repo>` (first publication) or
+`[update] <Game title> — <owner/repo>` (update). Body:
 ```
-<!-- ludea-publish v1 repo=<owner/repo> commit=<HEAD sha> engine=<engine version> -->
+<!-- ludea-publish v1 kind=<publish|update> repo=<owner/repo> commit=<HEAD sha> previous=<reviewedCommit or none> engine=<engine version> -->
 ### Game
 - **Title:** … · **Repo:** https://github.com/<owner/repo> · **Live:** <pages url>
 - **Commit submitted:** <sha>   (the review covers exactly this version)
@@ -53,6 +67,8 @@ Title: `[publish] <Game title> — <owner/repo>`. Body:
 - **Credited as:** <meta.author.name> · **GitHub:** @<meta.author.github> · **Link:** <meta.author.url or none>
 - **Contributors:** @<login> (<name>), … — linked on the card as open-source contributors
 - The original repo stays theirs; Ludea serves a reviewed copy and credits them on the card.
+### What changed for players (update only)
+<plain-words list since the published version + screenshots if visible>
 ### Readiness report
 <publish-check output (blockers: none), tour result, i18n --check, engine drift: none / reported in #…>
 ```

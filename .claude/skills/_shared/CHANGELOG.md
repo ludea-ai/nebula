@@ -1,17 +1,20 @@
-# Ludea engine — what's new
+# Ludea engine — release notes
 
-Plain-words notes per engine version (newest first). Written by **triage-upstream** for every
-batch it merges; read by `update-check.cjs` to tell creators what a new version brings.
-One line per change, written for a game creator (what they can now do / what got fixed).
+What each engine version brings to a game, in plain words (newest first). Written by
+**triage-upstream** for every batch it merges; shown to creators by `update-check.cjs` (at the
+start of a session) and by **ludea-update** (which also suggests which new capabilities fit
+their game). Two lists per version:
+- `### New — you can switch it on`: capabilities a game must opt into in its config. One line each:
+  **what it lets you do** — `config key` — the kind of game it suits.
+- `### Better — automatic`: fixes and improvements every game gets just by updating.
 
 ## 2026-10-18.9
-- Missions: each offer can have its own rules (one leg or round trip, its own messages, target,
-  extra counter); offers are saved by `id`, so reordering them keeps saved games valid.
-- Chase: `caughtKeepsMission` — when caught, the player only pays the fine and keeps the mission
-  (gentler for young kids); can be set per offer.
-- The guide's off-screen arrow no longer covers the HUD buttons.
-- new-game confirms the hero (species + name) before drawing it (voice dictation mishears),
-  turns GitHub Pages on before the first push, and checks its hand-back list.
-- More reliable tests (race overtake, chase on Safari, guide arrow in small worlds); `playtest.cjs --help`.
-- Ludea loop: report-upstream, /ludea-feedback, /ludea-publish; the author of a game is filled
-  from its GitHub data.
+### New — you can switch it on
+- **Each mission offer can have its own rules** (one trip or a round trip, its own target, messages and counter — e.g. a small and a big treasure) — `missions.offers[].pickups / dests / target / messages / stat` — games with deliveries or treasure hunts.
+- **A gentle chase**: when caught, the player only pays a small fine and keeps the mission — `chase.caughtKeepsMission` (also per offer) — games for young kids with a pursuer.
+### Better — automatic
+- The guide's off-screen arrow no longer covers the buttons at the top of the screen.
+- Saved games stay valid when mission offers are reordered (offers are saved by `id`).
+- Creating a game now confirms the hero (species + name) before drawing it, and turns the website on before the first upload.
+- More reliable automatic tests (race, chase on Safari, guide arrow in small worlds).
+- Ludea loop: engine problems and improvements are reported to Ludea automatically; `/ludea-feedback`, `/ludea-publish`.

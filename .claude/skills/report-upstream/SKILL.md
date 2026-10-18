@@ -13,7 +13,10 @@ it, integrates it in Nebula, and propagates it to the template and every catalog
 ## 0. Should it run here?
 ```bash
 node .claude/skills/_shared/upstream.cjs context      # repo, game, engine version, drift, already reported
+node .claude/skills/_shared/update-check.cjs          # a newer engine may already fix it (and games made
+                                                      # before the session-start notice existed never saw it)
 ```
+If a newer engine already contains the fix, don't report it: offer **ludea-update** instead.
 - `isUpstream: true` (in `ludea-ai/nebula` or `ludea-ai/game-engine`) → **don't report**: you
   ARE upstream, fix it directly (capitalize-learnings → sync-engine).
 - The creator said they don't want reports → honour it, write `Upstream reports: off` in

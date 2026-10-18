@@ -49,6 +49,14 @@ for their game, what was checked, what was NOT (real phone, sound), and the buil
 for at the bottom of the home screen. If the game is in the Ludea catalogue, a new
 **/ludea-publish** sends the updated version for review.
 
+## 5. Suggest what the game could now do (never switch it on alone)
+Read the `### New — you can switch it on` lines of every version between the old and the new
+engine (`update-check.cjs --json` → `news`, or `_shared/CHANGELOG.md`). Keep the 1–3 that fit THIS
+game (look at its config: missions? a chase? riding? young players?) and offer them as ideas, in
+their words: « Maintenant, ton jeu pourrait aussi… Tu veux que je l'ajoute ? ». A yes = normal
+work on the game (config + art + tests + deploy), one idea at a time. If the game is published in
+the Ludea catalogue, remind them that **/ludea-publish** sends the improved version for review.
+
 ## Guard-rails
 - Only with the creator's yes; never in the middle of their task or during a feedback session.
 - Never overwrite an unreported local engine change (report it first).

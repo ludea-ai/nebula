@@ -113,8 +113,10 @@ Branch `upstream/<YYYY-MM-DD>` from `nebula` main.
   every repo shares (§5, §7, §8, §9) are hand-copied to every target during Phase A.
 - Then: **capitalize-learnings** (ENGINE.md, skills, CLAUDE.md §9 if quality feedback),
   `separation-audit.cjs`, Nebula pre-push checks (tour chromium + webkit, i18n --check, the
-  relevant probes), a new section `## <version>` at the top of `_shared/CHANGELOG.md` (one plain
-  line per change, written for creators — `update-check.cjs` shows it to them), `upstream.cjs write-manifest` (it hashes the WORKING TREE: make sure nothing
+  relevant probes), a new section `## <version>` at the top of `_shared/CHANGELOG.md` with
+  `### New — you can switch it on` (each opt-in capability: **what it lets a game do** — `config key`
+  — the kind of game it suits) and `### Better — automatic` (fixes every game gets by updating),
+  in plain words for creators — `update-check.cjs` and **ludea-update** show it to them, `upstream.cjs write-manifest` (it hashes the WORKING TREE: make sure nothing
   but the batch is modified), `bump-version.mjs`.
 - Open ONE PR on `ludea-ai/nebula`, label `upstream-batch`. Body: per item → issue link,
   kind, what changed, how it was verified (probe names + results), what was NOT verified;
