@@ -74,6 +74,11 @@ docs or the CHANGELOG — rewrite it.
      starter tour too. A red check → don't push that target, comment on the PR, continue.
    - Commit `Engine <version>: <one line> (from ludea-ai/nebula#<pr>)`, push to `main`, confirm
      the `deploy.yml` run is green.
+   **Rollback (a game broken after its update — seen by the live check, a creator or the owner):**
+   at once, on that game's repo: `git revert --no-edit <propagation commit>` (it restores the previous
+   engine and version), push, wait for the deploy, check it plays live — then tell the owner in
+   French (which game, what broke, back on build vN), reopen the batch's issues for that game and fix
+   it in the next PR. Never leave a game broken while you investigate.
 3. Label the PR `propagated`; comment the list of updated repos (+ skipped ones and why).
 4. Close the linked issues with a comment: "Integrated in engine <version> (nebula#<pr>),
    live in: …. Games outside the Ludea organisation get it with **sync-engine** from

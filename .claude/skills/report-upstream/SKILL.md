@@ -21,6 +21,10 @@ If a newer engine already contains the fix, don't report it: offer **/update** i
   ARE upstream, fix it directly (capitalize-learnings → sync-engine).
 - The creator said they don't want reports → honour it, write `Upstream reports: off` in
   CLAUDE.md §10, stop. (Never ask by default: reporting is the expected behaviour.)
+- **First report ever from this repo** (`reported` is empty): before sending, tell the creator once,
+  in one plain sentence in their language: what goes to Ludea (generic engine problems and engine
+  improvements, as public issues — never personal data), why (every game benefits), and that they
+  can say "don't report to Ludea" at any time. Then go on unless they object.
 - Read the drift: `drift.changed/added/removed` = what to report; `drift.alreadyUpstream` = the
   same files Ludea already has (came with a sync) → nothing to do; `driftUnreported` = what is
   still not reported (empty = nothing left).

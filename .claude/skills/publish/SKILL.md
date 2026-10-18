@@ -48,6 +48,15 @@ Plus the game's usual QA (they must be green before submitting):
   C'est bon ? ») — they may prefer a pseudonym. Never a child's full real name.
   Commit + deploy it with the rest.
 
+## 2b. The creator's consent (required — ask it every time, in their language)
+One simple question (AskUserQuestion), word for word in substance:
+« Pour que ton jeu soit sur ludea.ai, tu autorises Ludea à héberger, montrer et mettre à jour une
+copie relue de ton jeu, avec ton nom, et tu peux demander son retrait à tout moment. Ton dépôt reste
+le tien. D'accord ? » (EN: "To be on ludea.ai, you allow Ludea to host, show and update a reviewed
+copy of your game, credited to you, and you can ask for its removal at any time. Your repository
+stays yours. OK?"). No → stop, nothing is sent. The person must be the game's creator (or a
+co-author); a child's game is submitted by the adult who manages it.
+
 ## 3. File the request (public issue on `ludea-ai/ludea-ai.github.io`)
 Write it in **English** (all Ludea issues are), except the catalogue description, which is given
 in both English and French (the catalogue is bilingual).
@@ -69,6 +78,10 @@ Title: `[publish] <Game title> — <owner/repo>` (first publication) or
 - The original repo stays theirs; Ludea serves a reviewed copy and credits them on the card.
 ### What changed for players (update only)
 <plain-words list since the published version + screenshots if visible>
+### Consent
+- [x] The creator (@<login>) allows Ludea to host, show and update a reviewed copy of this game on
+  ludea.ai, credited to them, and may ask for its removal at any time. (Given on <date> in the
+  creator's session.)
 ### Readiness report
 <publish-check output (blockers: none), tour result, i18n --check, engine drift: none / reported in #…>
 ```
