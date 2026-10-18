@@ -7,7 +7,7 @@
 //   - which engine it runs (manifest.version),
 //   - what IT changed in the engine layer since (drift = files whose hash differs),
 //   - the exact patch of that change (base blobs fetched from the public Ludea repos).
-// Used by the report-upstream / ludea-feedback / ludea-publish skills (games → Ludea) and by
+// Used by the report-upstream / idea / publish skills (games → Ludea) and by
 // sync-engine (refuses to overwrite unreported drift).
 //
 //   node .claude/skills/_shared/upstream.cjs context [--offline]  # JSON: repo, game, engine, drift

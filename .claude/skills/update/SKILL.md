@@ -1,9 +1,9 @@
 ---
-name: ludea-update
-description: Update THIS game to the latest Ludea engine (from the public template ludea-ai/game-engine), safely and in plain words — after the creator said yes. Reports any local engine change first (nothing is lost), copies the new engine layer, checks the game still works (tour on phone + Safari, translations, separation), puts it online and tells the creator what is new and which build number to look for. The SessionStart hook (update-check.cjs) tells you when a new version exists. Triggers: "update the engine", "mets à jour le moteur", "get the latest Ludea version", "is there a new engine version?", after the update-check notice and the creator's yes.
+name: update
+description: Update THIS game to the latest Ludea engine (from the public template ludea-ai/game-engine), safely and in plain words — after the creator said yes. Reports any local engine change first (nothing is lost), copies the new engine layer, checks the game still works (tour on phone + Safari, translations, separation), puts it online and tells the creator what is new and which build number to look for. The SessionStart hook (update-check.cjs) tells you when a new version exists. Triggers: "/update", "update the engine", "mets à jour le moteur", "get the latest Ludea version", "is there a new engine version?", after the update-check notice and the creator's yes.
 ---
 
-# ludea-update (Ludea template → this game, on the creator's yes)
+# update (Ludea template → this game, on the creator's yes)
 
 For games made from the template, in the creator's OWN repo. (Ludea's own games are updated
 by the maintainers' engine agent — `update-check.cjs` stays silent there.)
@@ -47,7 +47,7 @@ plainly that the update waits for a fix.
 push, check the deploy is green (release-deploy). Then, in their language, 2–3 lines: what is new
 for their game, what was checked, what was NOT (real phone, sound), and the build number to look
 for at the bottom of the home screen. If the game is in the Ludea catalogue, a new
-**/ludea-publish** sends the updated version for review.
+**/publish** sends the updated version for review.
 
 ## 5. Suggest what the game could now do (never switch it on alone)
 Read the `### New — you can switch it on` lines of every version between the old and the new
@@ -55,7 +55,7 @@ engine (`update-check.cjs --json` → `news`, or `_shared/CHANGELOG.md`). Keep t
 game (look at its config: missions? a chase? riding? young players?) and offer them as ideas, in
 their words: « Maintenant, ton jeu pourrait aussi… Tu veux que je l'ajoute ? ». A yes = normal
 work on the game (config + art + tests + deploy), one idea at a time. If the game is published in
-the Ludea catalogue, remind them that **/ludea-publish** sends the improved version for review.
+the Ludea catalogue, remind them that **/publish** sends the improved version for review.
 
 ## Guard-rails
 - Only with the creator's yes; never in the middle of their task or during a feedback session.

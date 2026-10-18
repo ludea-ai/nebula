@@ -47,7 +47,7 @@ async function publishedStatus(slug) {
   } catch (e) { return; }
   if (!n) return;
   if (mode === "json") { console.log(JSON.stringify({ published: g.url, reviewedCommit: g.reviewedCommit, changesSince: n })); return; }
-  out.push(`[Ludea] This game is published in the Ludea catalogue (${g.url}), but the published version is behind: ${n} change(s) to the game since the reviewed version. When the creator is happy with their current version, offer to send the update to the catalogue (skill ludea-publish, update mode). Never send it without their yes.`);
+  out.push(`[Ludea] This game is published in the Ludea catalogue (${g.url}), but the published version is behind: ${n} change(s) to the game since the reviewed version. When the creator is happy with their current version, offer to send the update to the catalogue (/publish, it handles updates). Never send it without their yes.`);
 }
 
 function installHook() {
@@ -95,7 +95,7 @@ function installHook() {
       `[Ludea] A newer version of the Ludea engine is available for this game: ${latest} (this game runs ${local}).`,
       news.length ? "New capabilities the game could switch on:\n" + news.slice(0, 8).map((n) => "- " + n).join("\n") : "",
       fixes.length ? "Better automatically:\n" + fixes.slice(0, 8).map((n) => "- " + n).join("\n") : "",
-      "At a natural moment (not in the middle of a task, never during a feedback session), tell the creator in ONE or two plain sentences, in their language, what it brings for THEIR game (the fixes they'd notice, and the 1-2 new capabilities that fit it), and offer to update it (skill ludea-update). Do not update without their yes.",
+      "At a natural moment (not in the middle of a task, never during a feedback session), tell the creator in ONE or two plain sentences, in their language, what it brings for THEIR game (the fixes they'd notice, and the 1-2 new capabilities that fit it), and offer to update it (/update). Do not update without their yes.",
     ].filter(Boolean).join("\n"));
     }
     await publishedStatus(slug);

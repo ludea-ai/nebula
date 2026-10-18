@@ -1,6 +1,6 @@
 ---
 name: triage-upstream
-description: LUDEA MAINTAINERS ONLY (runs in ludea-ai/nebula). Processes the engine inbox — issues filed on ludea-ai/game-engine by games (report-upstream), creators (ludea-feedback) or people — qualifies each one (bug / contribution / idea; accepted, duplicate, game-specific, needs-info), implements the accepted ones in Nebula on a branch and opens ONE pull request for the owner to approve; after the owner merges, propagates the engine to the template and every catalogue game and closes the issues. Run by the nightly scheduled task or on demand. Triggers: "triage the engine issues", "process the upstream reports", "run the engine inbox", "propagate the merged engine batch".
+description: LUDEA MAINTAINERS ONLY (runs in ludea-ai/nebula). Processes the engine inbox — issues filed on ludea-ai/game-engine by games (report-upstream), creators (/idea) or people — qualifies each one (bug / contribution / idea; accepted, duplicate, game-specific, needs-info), implements the accepted ones in Nebula on a branch and opens ONE pull request for the owner to approve; after the owner merges, propagates the engine to the template and every catalogue game and closes the issues. Run by the nightly scheduled task or on demand. Triggers: "triage the engine issues", "process the upstream reports", "run the engine inbox", "propagate the merged engine batch".
 ---
 
 # triage-upstream (Ludea inbox → Nebula → every game)
@@ -116,7 +116,7 @@ Branch `upstream/<YYYY-MM-DD>` from `nebula` main.
   relevant probes), a new section `## <version>` at the top of `_shared/CHANGELOG.md` with
   `### New — you can switch it on` (each opt-in capability: **what it lets a game do** — `config key`
   — the kind of game it suits) and `### Better — automatic` (fixes every game gets by updating),
-  in plain words for creators — `update-check.cjs` and **ludea-update** show it to them, `upstream.cjs write-manifest` (it hashes the WORKING TREE: make sure nothing
+  in plain words for creators — `update-check.cjs` and **update** show it to them, `upstream.cjs write-manifest` (it hashes the WORKING TREE: make sure nothing
   but the batch is modified), `bump-version.mjs`.
 - Open ONE PR on `ludea-ai/nebula`, label `upstream-batch`. Body: per item → issue link,
   kind, what changed, how it was verified (probe names + results), what was NOT verified;

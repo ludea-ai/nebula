@@ -2,7 +2,7 @@
 
 What each engine version brings to a game, in plain words (newest first). Written by
 **triage-upstream** for every batch it merges; shown to creators by `update-check.cjs` (at the
-start of a session) and by **ludea-update** (which also suggests which new capabilities fit
+start of a session) and by **update** (which also suggests which new capabilities fit
 their game). Two lists per version:
 - `### New — you can switch it on`: capabilities a game must opt into in its config. One line each:
   **what it lets you do** — `config key` — the kind of game it suits.
@@ -17,4 +17,4 @@ their game). Two lists per version:
 - Saved games stay valid when mission offers are reordered (offers are saved by `id`).
 - Creating a game now confirms the hero (species + name) before drawing it, and turns the website on before the first upload.
 - More reliable automatic tests (race, chase on Safari, guide arrow in small worlds).
-- Ludea loop: engine problems and improvements are reported to Ludea automatically; `/ludea-feedback`, `/ludea-publish`.
+- Ludea loop: engine problems and improvements are reported to Ludea automatically; `/idea`, `/publish`.

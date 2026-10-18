@@ -1,9 +1,9 @@
 ---
-name: ludea-feedback
-description: The game's CREATOR gives feedback on the Ludea engine itself — "it would be great if the engine could…", "this skill annoyed me", "this was hard to do". Qualifies each item (bug, idea, or an improvement already built in this game), asks at most one plain-words question, de-duplicates and files it as an issue on ludea-ai/game-engine (or a one-click prefilled link). Not for feedback on the GAME by its players (that is feedback-session). Triggers: "/ludea-feedback", "feedback for the engine", "I'd like the engine to…", "suggest an engine improvement", "the engine should…".
+name: idea
+description: The game's CREATOR gives feedback on the Ludea engine itself — "it would be great if the engine could…", "this skill annoyed me", "this was hard to do". Qualifies each item (bug, idea, or an improvement already built in this game), asks at most one plain-words question, de-duplicates and files it as an issue on ludea-ai/game-engine (or a one-click prefilled link). Not for feedback on the GAME by its players (that is feedback-session). Triggers: "/idea", "feedback for the engine", "I'd like the engine to…", "suggest an engine improvement", "the engine should…".
 ---
 
-# ludea-feedback (creator → Ludea, on demand)
+# idea (creator → Ludea, on demand)
 
 **report-upstream** sends back automatically what the WORK taught. This skill is the
 creator's own voice: wishes, irritations, ideas about the engine, the skills, the template,
@@ -41,4 +41,4 @@ the docs or the catalogue. Same inbox (`ludea-ai/game-engine` issues), same tria
 
 ## Chaining
 → **report-upstream** for contributions. For player feedback on the game: **feedback-session**.
-To submit the finished game to the catalogue: **ludea-publish**.
+To submit the finished game to the catalogue (or an update of it): **/publish**.

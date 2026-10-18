@@ -60,7 +60,7 @@ the config). Exit 0 = clean.
    failure of a skill/tool/doc you hit — goes back to Ludea with **report-upstream** (automatic,
    silent, de-duplicated). In Nebula you ARE upstream: the change ships through sync-engine.
 5. **Engine version**: `node .claude/skills/_shared/update-check.cjs` — if a newer Ludea engine or a
-   catalogue update is pending, mention it to the creator in one sentence (ludea-update / ludea-publish).
+   catalogue update is pending, mention it to the creator in one sentence (update / publish).
 6. **Ship**: hand off to **release-deploy** (bumps `vN`, commits, deploys, verifies).
 
 ## Guard-rails

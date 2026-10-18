@@ -1,9 +1,9 @@
 ---
-name: ludea-publish
-description: The creator asks to publish their game in the Ludea catalogue (https://ludea.ai/) — or to send an UPDATE of a game already published there. Checks the game is ready and safe for children (catalogue fields, age, description, French + English, icons, credits, no tracker / external link / data collection, no errors, engine changes reported), fixes what can be fixed with them, then files a publication request on ludea-ai/ludea-ai.github.io for the Ludea review. Triggers: "/ludea-publish", "publish my game on Ludea", "update my game in the catalogue", "envoie la mise à jour sur ludea.ai", "put my game in the catalogue", "submit my game", "je veux que mon jeu soit sur ludea.ai".
+name: publish
+description: The creator asks to publish their game in the Ludea catalogue (https://ludea.ai/) — or to send an UPDATE of a game already published there. Checks the game is ready and safe for children (catalogue fields, age, description, French + English, icons, credits, no tracker / external link / data collection, no errors, engine changes reported), fixes what can be fixed with them, then files a publication request on ludea-ai/ludea-ai.github.io for the Ludea review. Triggers: "/publish", "publish my game on Ludea", "update my game in the catalogue", "envoie la mise à jour sur ludea.ai", "put my game in the catalogue", "submit my game", "je veux que mon jeu soit sur ludea.ai".
 ---
 
-# ludea-publish (creator → Ludea catalogue: first publication OR update)
+# publish (creator → Ludea catalogue: first publication OR update)
 
 The game stays in the creator's repo. Publishing asks Ludea to **review** it and, once
 accepted, to **copy (fork) it into the `ludea-ai` organisation** — the catalogue serves that
@@ -54,7 +54,7 @@ in both English and French (the catalogue is bilingual).
 Title: `[publish] <Game title> — <owner/repo>` (first publication) or
 `[update] <Game title> — <owner/repo>` (update). Body:
 ```
-<!-- ludea-publish v1 kind=<publish|update> repo=<owner/repo> commit=<HEAD sha> previous=<reviewedCommit or none> engine=<engine version> -->
+<!-- publish v1 kind=<publish|update> repo=<owner/repo> commit=<HEAD sha> previous=<reviewedCommit or none> engine=<engine version> -->
 ### Game
 - **Title:** … · **Repo:** https://github.com/<owner/repo> · **Live:** <pages url>
 - **Commit submitted:** <sha>   (the review covers exactly this version)
@@ -79,7 +79,7 @@ Route: GitHub MCP `issue_write` → `gh issue create -R ludea-ai/ludea-ai.github
 ## 4. Tell the creator — plain words
 « Ta demande est envoyée (lien). L'équipe Ludea va vérifier ton jeu — surtout qu'il est bien
 adapté aux enfants — puis il apparaîtra sur ludea.ai. Tu seras prévenu sur cette page. »
-Explain they can keep improving their game; a new version means a new `/ludea-publish`.
+Explain they can keep improving their game; a new version means a new `/publish`.
 Talk to the creator in THEIR language (the one they write in).
 
 ## Guard-rails
@@ -89,4 +89,4 @@ Talk to the creator in THEIR language (the one they write in).
 
 ## Chaining
 **test-debug / visual-review** (green) → **report-upstream** (no unreported drift) →
-**ludea-publish**. On the Ludea side: the catalogue's **review-submission** skill.
+**publish**. On the Ludea side: the catalogue's **review-submission** skill.

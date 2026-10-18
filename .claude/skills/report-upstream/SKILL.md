@@ -16,7 +16,7 @@ node .claude/skills/_shared/upstream.cjs context      # repo, game, engine versi
 node .claude/skills/_shared/update-check.cjs          # a newer engine may already fix it (and games made
                                                       # before the session-start notice existed never saw it)
 ```
-If a newer engine already contains the fix, don't report it: offer **ludea-update** instead.
+If a newer engine already contains the fix, don't report it: offer **/update** instead.
 - `isUpstream: true` (in `ludea-ai/nebula` or `ludea-ai/game-engine`) → **don't report**: you
   ARE upstream, fix it directly (capitalize-learnings → sync-engine).
 - The creator said they don't want reports → honour it, write `Upstream reports: off` in
@@ -106,4 +106,4 @@ Keep the local change: the game keeps working; the next engine sync brings it ba
 
 ## Chaining
 **capitalize-learnings** → **report-upstream** → release-deploy. **sync-engine** refuses to
-overwrite unreported drift (run this first). Ideas from the creator go through **ludea-feedback**.
+overwrite unreported drift (run this first). Ideas from the creator go through **/idea**.
