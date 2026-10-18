@@ -54,6 +54,8 @@ echo "Pulling engine layer: ${PATHS[*]}"
 git checkout "$REMOTE/$REF" -- "${PATHS[@]}"
 
 echo; echo "== engine manifest =="; node .claude/skills/_shared/upstream.cjs write-manifest && git add .claude/skills/_shared/engine-manifest.json
+# Creators are told when a newer Ludea engine exists (SessionStart hook, added once; silent in Ludea's repos).
+node .claude/skills/_shared/update-check.cjs --install-hook && git add .claude/settings.json 2>/dev/null || true
 echo; echo "== separation audit =="; node .claude/skills/_shared/separation-audit.cjs || true
 echo; echo "== engine syntax ==";   node --check engine.js && echo "engine.js OK"
 
