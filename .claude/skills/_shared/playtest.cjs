@@ -25,6 +25,8 @@
  *   --viewport WxH  window size (def. 900x900; ignored when --device is set)
  *   --engine NAME   browser engine: chromium (def.) | webkit (real Safari engine) | firefox
  *   --device NAME   emulate a Playwright device (touch + UA), e.g. "iPhone 13"
+ *   --url URL       accepted as --port (http://localhost:N/)
+ *   --help, -h      print this usage and exit
  *
  * iOS / Safari note: several touch bugs (implicit pointer-capture freeze, blue
  * text-selection) do NOT reproduce in headless Chromium. Use `--engine webkit`
@@ -43,6 +45,12 @@ function arg(name, def) {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : def;
 }
 const has = (name) => process.argv.includes(name);
+// --help / -h: print the usage block of this file's header comment (exit 0).
+if (has("--help") || has("-h")) {
+  const src = require("node:fs").readFileSync(__filename, "utf8"), m = src.match(/\/\*([\s\S]*?)\*\//);
+  console.log(m ? m[1].split("\n").map((l) => l.replace(/^ \* ?/, "")).join("\n").trim() : "see the header of playtest.cjs");
+  process.exit(0);
+}
 // Refuse unknown flags: a silently ignored option (e.g. --url) once made every "other game" test
 // run against the default port's game instead. --url http://localhost:N/ is accepted as --port N.
 const KNOWN = ["--device", "--engine", "--eval", "--out", "--port", "--probe", "--shots", "--viewport", "--walk", "--url"];
@@ -82,9 +90,10 @@ process.argv.slice(2).forEach((a) => { if (a.startsWith("--") && !KNOWN.includes
     // Most common cause for webkit/firefox: the browser binary isn't installed.
     if (engineName !== "chromium") {
       console.error(
-        `PLAYTEST: could not launch ${engineName}. Install it once, then retry:\n` +
+        `PLAYTEST: could not launch ${engineName}. Install it once per machine/container, then retry:\n` +
         `  npx playwright install ${engineName}\n` +
         `  npx playwright install-deps ${engineName}    # system libraries (Linux)\n` +
+        `  (no npx playwright? the global CLI: node /opt/node22/lib/node_modules/playwright/cli.js install ${engineName})\n` +
         `Original error: ${e.message}`);
       process.exit(3);
     }

@@ -13,7 +13,7 @@ robot tends glowing alien critters on a space station (deck island in the void, 
 Plaza, shop street, Star Ring road through an asteroid belt), and the demo turns on (nearly)
 every engine system: care + close-up, variants + happy faces, aging, breeding, riding +
 jumps (Gravity Park arena, Star Ring loop), economy + shop + decorations, station menu +
-paid restyle, spawn portal, 3 kinds of two-leg deliveries + drone chase, Hatchery models,
+paid restyle, spawn portal, 4 kinds of deliveries (per-offer overrides: a one-leg star post, a rare egg with its own stat/unlock) + drone chase (caughtKeepsMission), Hatchery models,
 pseudo-3D race, ground patches (districts).
 New games still start **minimal** from `.claude/skills/new-game/references/minimal-seed.config.js`.
 Whenever the engine gains a capability, **add it to Nebula too** (it must show everything).
@@ -62,6 +62,10 @@ to every repo · `ludea-ai.github.io` = the brand site + games catalogue · the 
   (`node .claude/skills/_shared/playtest.cjs`) for screenshots, walkability and page
   errors. The harness points Chromium at `HTTPS_PROXY` when set; Phaser is vendored so
   tests don't need a CDN. **Always validate visually before pushing.**
+- **WebKit is NOT pre-installed** (only Chromium): install it once per container before any
+  `--engine webkit` run — `node /opt/node22/lib/node_modules/playwright/cli.js install webkit`
+  (+ `install-deps webkit`); the harness prints this hint and exits 3 when it is missing.
+  `playtest.cjs --help` prints all options.
 - Several games served at once: target one with `--port N` (nebula 8099, dr-smile 8100, gta7 8101,
   my-little-stable 8102, game-engine starter 8103, ludea.ai site 8104). The harness refuses unknown options — an ignored `--url` once made every
   "other game" regression silently test Nebula.
@@ -173,7 +177,8 @@ like a game made by a studio — not a prototype. Concretely:
   improvement that is not visible. Batch releases while the owner is testing.
 - **Shared repos**: never assume a cross-session message is current (they arrive late); wait for an
   explicit answer before pushing to a repo another session works on. `pkill -f "http.server N"` kills
-  your own shell when the command line contains that string — find the pid (`ss -ltnp`) and `kill` it.
+  your own shell when the command line contains that string — find the pid (`lsof -i :N`; `ss` is not
+  installed in the cloud containers) and `kill` it.
 - **The showcase has its own world**: Nebula reuses the PRINCIPLES of the other games (care,
   riding, GTA-style pick-up → drop-off deliveries, chase, race…) but never copies one game's
   world layout (a fenced pen + arena + forest loop read as "the horse game"). Each game must
@@ -188,6 +193,10 @@ like a game made by a studio — not a prototype. Concretely:
   `--chip-bg` with two ROUND flags and a `--primary` knob that slides behind the active one; a tap
   switches. Owner iterations (don't redo them): text `FR · EN` = invisible; big 40 px flags = too
   big; tiny footer flags = no; flags merged into a split pill = "pas fan" → KEEP this knob toggle. Any new/changed text ships translated (`--check`).
+- **Requests are often dictated by voice**: names and creatures can be mis-transcribed (a "petit
+  poulpe" — octopus — once arrived as "petit poulet" — chick — and a whole hero was drawn for nothing).
+  Before drawing a hero, cross-check the request with the repo name / title, and when a word could be
+  heard two ways, confirm it (species + name spelling) first.
 - New owner feedback → add it to this section (via **capitalize-learnings**).
 
 ## 10. This game — « Nebula Nursery » (nebula), the showcase

@@ -109,10 +109,34 @@ module.exports = async (page) => {
 
   // --- idle → guide arrow ---
   if (await page.evaluate(() => !!GAME.guide)) {
-    await page.evaluate(() => { const sp = (GAME.player && GAME.player.spawn) || { x: player.x, y: player.y }; player.x = sp.x; player.y = sp.y; lastInputT = 0; moveTarget = null; navPath = []; followCreature = null; });
+    await page.evaluate(() => { const sp = (GAME.player && GAME.player.spawn) || { x: player.x, y: player.y }; player.x = sp.x; player.y = sp.y; lastInputT = nowMs() - 60000; moveTarget = null; navPath = []; followCreature = null; });
     await wait(page, 1500);
     r.guide = await page.evaluate(() => !!(guideArrow && (guideArrow.visible || !document.querySelector(".guide-edge.hidden"))));
     await shot(page, "12-guide");
+    // the off-screen edge pointer must never sit on the HUD bar or the bottom panel: send the player far
+    // from every creature, in each corner, and check the pointer's box against them (it once covered the help button)
+    // make every creature needy so the guide has someone to point at
+    await page.evaluate(() => { (GAME.creature && GAME.creature.needs || []).forEach((n) => state.creatures.forEach((c) => { c[n.id] = 10; })); guideTarget = null; if (typeof closeModal === "function") closeModal(); });
+    let shown = 0;
+    for (const [dx, dy] of [[0, 1], [1, 1], [-1, 1], [1, 0], [-1, 0], [0, -1], [1, -1], [-1, -1]]) {
+      // stand ~900 px from the guided creature in each of 8 directions (clamped to the world)
+      const [x, y] = await page.evaluate(([dx, dy]) => { const t = guideTarget || pickGuideTarget() || state.creatures[0]; if (!t) return [player.x, player.y];
+        const x = Math.max(60, Math.min(WORLD.w - 60, t.x + dx * 900)), y = Math.max(60, Math.min(WORLD.h - 60, t.y + dy * 900));
+        player.x = x; player.y = y; lastInputT = nowMs() - 60000; activeTarget = null; moveTarget = null; return [Math.round(x), Math.round(y)]; }, [dx, dy]);
+      await wait(page, 700);
+      const hit = await page.evaluate(() => {
+        const e = document.querySelector(".guide-edge"); if (!e || e.classList.contains("hidden")) return null;
+        window.__edgeShown = (window.__edgeShown || 0) + 1;
+        const a = e.getBoundingClientRect(), hits = [];
+        const over = (b) => b.width && b.height && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        document.querySelectorAll("#screen-game .top-bar .mini-btn, #screen-game .top-bar .resource, #screen-game .place-title").forEach((el) => { if (over(el.getBoundingClientRect())) hits.push(el.id || el.className); });
+        const pn = document.getElementById("panel"); if (pn && pn.offsetHeight && over(pn.getBoundingClientRect())) hits.push("panel");
+        return hits;
+      });
+      check(!hit || !hit.length, `guide edge pointer overlaps the HUD at (${x},${y}): ` + JSON.stringify(hit));
+      if (hit) shown++;
+    }
+    check(shown > 0, "the guide edge pointer never showed (the overlap check above checked nothing)");
   }
 
   // --- save round trip ---

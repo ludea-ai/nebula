@@ -197,7 +197,50 @@ module.exports = async (page) => {
       out.hot = hot;
       if (!hot.skipped) check(hot.heatBefore > 0 && hot.unitsBefore > 0 && hot.heatAfter === 0 && hot.unitsAfter === 0 && !hot.chip,
         "missions: delivering a hot mission did not end the chase");
+      // caught during a hot mission: caughtKeepsMission (chase-wide, or the offer's override) decides
+      // whether the mission survives. caught() is called directly — deterministic, so it does not depend
+      // on frame timing (a wall-clock catch loop was too slow / flaky in headless WebKit).
+      out.caught = await page.evaluate(async () => {
+        const M = GAME.missions, res = [];
+        for (let i = 0; i < (M.offers || []).length; i++) {
+          const of = M.offers[i]; if (!of.heat) continue;
+          state.mission = null; clearHeat(); openMissions(); choicePick(i);
+          if (state.mission && state.mission.stage === "pickup") { const g = missionGoal(state.mission); player.x = g.x; player.y = g.y; await new Promise((r2) => setTimeout(r2, 800)); }
+          if (!(state.heat > 0)) addHeat(of.heat);
+          const keep = !!(of.caughtKeepsMission !== undefined ? of.caughtKeepsMission : GAME.chase.caughtKeepsMission);
+          const coins = state.coins, had = !!state.mission;
+          caught();
+          res.push({ offer: of.id != null ? of.id : i, had, keep, kept: !!state.mission, heat: state.heat, units: chasers.length, fined: coins - state.coins });
+          state.mission = null; clearMissionVisual(); refreshCargo(); clearHeat();
+        }
+        return res;
+      });
+      out.caught.forEach((c) => check(c.had && c.kept === c.keep && c.heat === 0 && c.units === 0 && c.fined > 0,
+        `missions: caught during offer ${c.offer}: mission ${c.kept ? "kept" : "lost"} (expected ${c.keep ? "kept" : "lost"}), heat ${c.heat}, pursuers ${c.units}, fine ${c.fined}`));
     }
+    // per-offer overrides: each offer takes the right number of legs, is saved by its id (index when it has
+    // none), survives a save/load, and counts the mission stat + its own stat
+    out.offers = await page.evaluate(async () => {
+      const M = GAME.missions, res = [], st = M.stat || "missions";
+      for (let i = 0; i < (M.offers || []).length; i++) {
+        const of = M.offers[i];
+        state.mission = null; clearHeat(); openMissions(); choicePick(i);
+        if (!state.mission) { res.push({ offer: i, taken: false }); continue; }
+        const pk = of.pickups !== undefined ? of.pickups : M.pickups;
+        const o = { offer: of.id != null ? of.id : i, taken: true, twoLegs: state.mission.stage === "pickup", wantTwoLegs: !!(pk && pk.length) };
+        o.refOk = state.mission.offer === (of.id != null ? of.id : i);
+        save(); try { o.saveOk = JSON.parse(localStorage.getItem(SAVE_KEY)).mission.offer === state.mission.offer; } catch (e) { o.saveOk = false; }
+        const before = state.stats[st] || 0, own = of.stat && of.stat !== st ? (state.stats[of.stat] || 0) : null;
+        await window.__finishMission();
+        o.done = !state.mission; o.counted = (state.stats[st] || 0) === before + 1;
+        if (own != null) o.ownStat = (state.stats[of.stat] || 0) === own + 1;
+        res.push(o);
+        clearHeat();
+      }
+      return res;
+    });
+    out.offers.forEach((o) => check(o.taken && o.twoLegs === o.wantTwoLegs && o.refOk && o.saveOk && o.done && o.counted && o.ownStat !== false,
+      "missions: offer " + o.offer + " override broken: " + JSON.stringify(o)));
     r.missions = out;
   }
 

@@ -5,9 +5,10 @@ description: Scaffold a BRAND-NEW game from this generic engine. Use when the us
 
 # new-game ⭐ (initializer / scaffolder)
 
-Turn the engine into a specific game **without touching `engine.js`**. A game =
+Turn the engine into a specific game through its **config**, not its code. A game =
 `game.config.js` (the whole definition) + assets + CSS theme. This skill authors them
-from a short interview.
+from a short interview. The engine is changed only when it truly lacks a capability — then
+generically, config-gated, and reported back to Ludea (see Guard-rails).
 
 ## ⭐ Start MINIMAL
 A new game should ship **small**: the core loop and little else. Features get added by
@@ -53,6 +54,11 @@ Ask only what changes the output. Bundle into 1–2 `AskUserQuestion` calls:
   presentation: `render` look & feel and procedural `audio`. For young kids also turn on
   `guide` + `creature.tapAction` + `unlocks` — progression with no reading.) Only enable one if the user explicitly wants it in the
   first version.
+
+**Confirm the hero before drawing it.** Requests are often dictated by voice and mis-transcribed
+(a "petit poulpe" — octopus — once arrived as "petit poulet" — chick — and a whole character was drawn
+for nothing; the repo was even called `poulpy`). Cross-check the theme with the repo name / title, and
+when the hero's species or name could be heard two ways, make it the first interview question.
 
 If an answer is obvious from the theme, pick a sensible default and say so — don't
 over-ask. Bias toward the smallest playable game.
@@ -161,9 +167,29 @@ short screen) before anything else in this step.
   games to harvest learnings (see **sync-engine**).
 - **report-upstream**: send back to Ludea what this creation taught (skill steps that were
   wrong, tooling failures, engine changes made for this game) — silently, no question asked.
+- **Turn GitHub Pages on BEFORE the first push to `main`** (a repo made with "Use this template"
+  has Pages off; `deploy.yml`'s `configure-pages` cannot create the site with the workflow's
+  `GITHUB_TOKEN`, so the first run fails with "Create Pages site failed. Resource not accessible
+  by integration"). With the user's token:
+  ```bash
+  gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow   # 409 = already on: fine
+  ```
+  or Settings → Pages → Source: **GitHub Actions**. If a first run already failed, re-run it
+  (`gh run rerun <id>` or the Actions tab) once Pages is on.
 - **release-deploy** when the user wants it live (or hand back for review first).
 - Tell the creator, in one plain sentence each, about **/ludea-feedback** (ideas for the engine)
   and **/ludea-publish** (ask to be in the Ludea catalogue).
+
+### Before you hand back — check every box (each was once skipped silently)
+```bash
+gh api repos/<owner>/<repo>/pages --jq .build_type        # "workflow" (Pages on, GitHub Actions)
+gh api "repos/<owner>/<repo>/actions/runs?per_page=1" --jq '.workflow_runs[0].conclusion'   # "success"
+gh api repos/<owner>/<repo>/topics --jq .names             # contains "built-with-ludea"
+node .claude/skills/_shared/i18n-extract.cjs --to <other lang> --check   # exit 0
+node .claude/skills/_shared/upstream.cjs drift --unreported              # exit 0 = nothing left to report
+```
+Plus: tour green on Chromium 390x844 AND WebKit iPhone 13 (pageErrors [] / errors []), and the
+creator told about /ludea-feedback and /ludea-publish. A box you could not tick → say so plainly.
 
 ## Guard-rails
 - **Don't edit the engine for game content.** If the engine genuinely lacks a capability the
@@ -178,4 +204,5 @@ short screen) before anything else in this step.
 
 ## Chaining
 **new-game** → asset-search/asset-add (themed assets) → add-* skills → test-debug →
-map-verify → report-upstream → release-deploy → (later) ludea-publish.
+map-verify → capitalize-learnings → report-upstream → (Pages on) release-deploy → checklist above →
+(later) ludea-publish.
