@@ -55,7 +55,11 @@ the config). Exit 0 = clean.
    for any new skill.
 3. **Look**: run **visual-review** (art-check + tour screenshots + checklist) whenever art
    or UI changed — and add any new defect class you discovered to its checklist.
-4. **Ship**: hand off to **release-deploy** (bumps `vN`, commits, deploys, verifies).
+4. **Report upstream**: in a game repo (not `ludea-ai/nebula` / `ludea-ai/game-engine`), every
+   learning that belongs to the engine layer — an engine/skill/tooling change made here, or a
+   failure of a skill/tool/doc you hit — goes back to Ludea with **report-upstream** (automatic,
+   silent, de-duplicated). In Nebula you ARE upstream: the change ships through sync-engine.
+5. **Ship**: hand off to **release-deploy** (bumps `vN`, commits, deploys, verifies).
 
 ## Guard-rails
 - **Never put game content in `engine.js`.** If the engine truly lacks something, add it as
@@ -65,5 +69,6 @@ the config). Exit 0 = clean.
 - Keep new engine features **off by default** (config-gated), so existing games are unaffected.
 
 ## Chaining
-After **test-debug** (proof) → **capitalize-learnings** (harvest) → **release-deploy** (ship).
+After **test-debug** (proof) → **capitalize-learnings** (harvest) → **report-upstream** (games
+only: tell Ludea) → **release-deploy** (ship).
 Called by **feedback-session** for any item that produced a reusable insight.

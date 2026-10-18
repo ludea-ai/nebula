@@ -93,7 +93,14 @@ ios-pwa-check, release-deploy, **visual-review** (art-check + full-size crops + 
 screenshots + checklist — mandatory after any art/UI change). **capitalize-learnings** (run after every feature/bugfix:
 fold the learnings back into the engine/skills/docs and audit the separation).
 **sync-engine** (copy the engine layer from the repo where it evolved — normally Nebula —
-into the template and every game). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-assets.cjs`,
+into the template and every game).
+**Ludea loop** (games ↔ engine): **report-upstream** (automatic, after capitalize-learnings: a
+game's engine bugs + engine changes it already made → issues on `ludea-ai/game-engine`),
+**ludea-feedback** (`/ludea-feedback`: the creator's own ideas for the engine), **ludea-publish**
+(`/ludea-publish`: readiness + child-safety check → publication request on the catalogue repo),
+**triage-upstream** (maintainers, in Nebula: qualify the inbox → one PR the owner approves →
+propagate to the template + catalogue games). Engine fingerprint: `_shared/engine-manifest.json`
+(`upstream.cjs`). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-assets.cjs`,
 `sync-engine.sh`, `art-check.cjs`, `icon-kit.cjs`, `contact-sheet.py`, `probes/tour.cjs`).
 
 ## 8. Conventions

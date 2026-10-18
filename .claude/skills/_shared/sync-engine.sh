@@ -11,8 +11,14 @@
 # manifest.webmanifest, README.md, tools/, .claude/settings*.json.
 # Does NOT commit — you review the diff, then commit. Run from the TARGET repo root.
 #
-#   bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote-name> [ref]
+# Refuses to overwrite LOCAL engine-layer changes that Ludea doesn't have yet (they would be
+# lost): report them first (skill report-upstream), or pass --force once they are reported.
+# Afterwards it rewrites .claude/skills/_shared/engine-manifest.json (the engine fingerprint).
+#
+#   bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote-name> [ref] [--force]
+#   (a game outside the Ludea organisation updates from https://github.com/ludea-ai/game-engine.git)
 set -euo pipefail
+FORCE=""; ARGS=(); for a in "$@"; do [ "$a" = "--force" ] && FORCE=1 || ARGS+=("$a"); done; set -- "${ARGS[@]}"
 SRC="${1:?usage: sync-engine.sh <game-git-url|remote-name> [ref=main]}"
 REF="${2:-main}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"; cd "$ROOT"
@@ -20,6 +26,15 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"; cd "$ROOT"
 # Safety: refuse on a dirty tree so the review diff is unambiguous.
 if [ -n "$(git status --porcelain)" ]; then
   echo "Working tree not clean — commit or stash first, then re-run."; exit 1; fi
+
+# Safety: local engine changes not yet upstream would be overwritten.
+UP=.claude/skills/_shared/upstream.cjs
+if [ -z "$FORCE" ] && [ -f "$UP" ] && [ -f .claude/skills/_shared/engine-manifest.json ]; then
+  if ! node "$UP" drift --upstream >/tmp/sync-drift.txt 2>&1; then
+    cat /tmp/sync-drift.txt
+    echo "This repo changed the engine layer and Ludea doesn't have it yet — the sync would erase it."
+    echo "Run the report-upstream skill first (or re-run with --force once it is reported)."; exit 1; fi
+fi
 
 # Resolve SRC to a remote (reuse an existing remote name, else add a temp one).
 TMP=""
@@ -38,6 +53,7 @@ PATHS=(engine.js engine.css ENGINE.md .claude/skills)
 echo "Pulling engine layer: ${PATHS[*]}"
 git checkout "$REMOTE/$REF" -- "${PATHS[@]}"
 
+echo; echo "== engine manifest =="; node .claude/skills/_shared/upstream.cjs write-manifest && git add .claude/skills/_shared/engine-manifest.json
 echo; echo "== separation audit =="; node .claude/skills/_shared/separation-audit.cjs || true
 echo; echo "== engine syntax ==";   node --check engine.js && echo "engine.js OK"
 

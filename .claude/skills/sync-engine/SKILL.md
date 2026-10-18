@@ -46,6 +46,17 @@ node .claude/skills/_shared/separation-audit.cjs && node --check engine.js
 # review, then commit
 ```
 
+## Engine fingerprint & local changes
+`_shared/engine-manifest.json` = the git blob hash of every engine-layer file + an engine
+version (`YYYY-MM-DD.N`). `sync-engine.sh` rewrites it after each sync, so every repo knows
+which engine it runs and `node .claude/skills/_shared/upstream.cjs drift --upstream` lists what
+it changed locally that Ludea doesn't have. The script **refuses to sync over such changes**
+(they would be lost): run **report-upstream** first, then `--force`. In Nebula, run
+`upstream.cjs write-manifest` before committing any engine-layer change.
+Games outside the Ludea organisation update from the template:
+`bash .claude/skills/_shared/sync-engine.sh https://github.com/ludea-ai/game-engine.git main`.
+Inside Ludea, merged engine batches are propagated by **triage-upstream** (phase A).
+
 ## 3. Routine harvest (after bootstrap)
 ```bash
 bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote> [ref]
