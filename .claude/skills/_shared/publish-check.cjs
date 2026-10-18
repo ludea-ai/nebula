@@ -42,6 +42,10 @@ if (G) {
   else if (a.minAge < 3) W("meta.audience.minAge < 3 — the engine's games are designed for 5+");
   if (!a.notes) W("meta.audience.notes empty — describe the content level (e.g. 'gentle, no violence')");
   if (!M.lang) B("meta.lang missing (source language)");
+  const au = M.author || {};
+  info.author = au;
+  if (!au.name) B("meta.author.name missing — how the creator is credited on the catalogue card");
+  if (!au.github) W("meta.author.github missing — the creator's GitHub login (credit link)");
 }
 const i18n = rd("game.i18n.js");
 if (!i18n) B("game.i18n.js missing — every Ludea game is bilingual French / English");
