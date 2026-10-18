@@ -6,6 +6,8 @@ window.GAME_I18N.fr = {
   "Nebula Nursery": "Crèche Nébula",
   "Nebula": "Nébula",
   "Look after the little glowing critters!": "Prends soin des petites bestioles lumineuses !",
+  "Legal notice": "Mentions légales",
+  "Privacy": "Confidentialité",
   "Name your nursery:": "Nomme ta crèche :",
   "Starlight Bay": "Baie des Étoiles",
   "My Nursery": "Ma crèche",

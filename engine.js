@@ -121,7 +121,7 @@ const LANG = (function () {
 const DICT = I18N[LANG] || null;   // for the source language it only holds the engine fallbacks (when not English)
 function L(s) { return DICT && typeof s === "string" && DICT[s] != null && DICT[s] !== "" ? DICT[s] : s; }
 // Keys that hold identifiers / asset refs, never text: never translated.
-const I18N_SKIP = /^(id|ids|saveKey|legacySave|audience|assetVersion|path|src|sheet|sprite|img|image|thumb|icon|color|tint|stat|need|type|kind|mode|font|key|lang)$|(Id|Ids|Sheet|Sprite|Icon|Bg|BgDone|BgWide|BgWideDone|Img|Color|Path|Key)$/;
+const I18N_SKIP = /^(id|ids|saveKey|legacySave|audience|author|url|href|assetVersion|path|src|sheet|sprite|img|image|thumb|icon|color|tint|stat|need|type|kind|mode|font|key|lang)$|(Id|Ids|Sheet|Sprite|Icon|Bg|BgDone|BgWide|BgWideDone|Img|Color|Path|Key)$/;
 (function tr(o, d) {
   if (!DICT || !o || d > 14) return;
   for (const k in o) {
@@ -4329,7 +4329,11 @@ function openGoals() {
 
 function openHelp() {
   const items = (G.help || []).map((h, i) => `<div class="help-row${i === 0 ? " lead" : ""}">${fmt(h, true)}</div>`).join("");
-  openModal(META.helpTitle || L("How to play"), `<div class="help-text">${items}</div>`);
+  // optional small legal links at the very bottom (meta.legalLinks: [{ label, url }]) — out of the
+  // way of young players, but always reachable (publisher's legal notice / privacy policy)
+  const legal = (META.legalLinks || []).filter((l) => l && l.label && /^(https:\/\/|\/|\.\.?\/)/.test(l.url || ""))
+    .map((l) => `<a href="${l.url}">${L(l.label)}</a>`).join(" · ");
+  openModal(META.helpTitle || L("How to play"), `<div class="help-text">${items}</div>${legal ? `<p class="help-legal">${legal}</p>` : ""}`);
 }
 
 /* ===================== Boot ===================== */

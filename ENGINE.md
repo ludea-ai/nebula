@@ -79,6 +79,7 @@ title, titleIcon, logo ("assets/img/logo.png" — big home-screen image), shortN
 legacySave: { key: "old-key" | ["k1","k2"], migrate: (old) => stateLike },   // see below
 audience: { minAge, notes },          // used by the asset skills' content policy
 author: { name, github, url, contributors: [{ login, name }] }, // credit in the Ludea catalogue (publish, filled from `upstream.cjs author`); not shown in-game
+legalLinks: [{ label, url }],      // optional: small links at the bottom of the help screen (legal notice, privacy) — https or same-site URLs only
 theme: { home, play, closeup },        // iOS theme-color per screen
 showCoins,                             // false → hide the coins HUD (no economy)
 showDay, showCreatureCount,            // false → hide the day / creature-count HUD chips (minimal HUD)

@@ -33,7 +33,7 @@ const ONLY_ENGINE = to === SRC;
 if (ONLY_ENGINE && SRC === "en") { console.error("--to en: the game is already in English (meta.lang)"); process.exit(2); }
 
 // Same skip rule as engine.js (I18N_SKIP) + text-shape filters.
-const SKIP = /^(id|ids|saveKey|legacySave|audience|assetVersion|path|src|sheet|sprite|img|image|thumb|icon|color|tint|stat|need|type|kind|mode|font|key|lang)$|(Id|Ids|Sheet|Sprite|Icon|Bg|BgDone|BgWide|BgWideDone|Img|Color|Path|Key)$/;
+const SKIP = /^(id|ids|saveKey|legacySave|audience|author|url|href|assetVersion|path|src|sheet|sprite|img|image|thumb|icon|color|tint|stat|need|type|kind|mode|font|key|lang)$|(Id|Ids|Sheet|Sprite|Icon|Bg|BgDone|BgWide|BgWideDone|Img|Color|Path|Key)$/;
 const TEXTKEY = /label|name|title|text|unit|hint|message|prompt|placeholder|^and$|suffix|word/i;
 function isText(s, k) {
   if (!/\p{L}/u.test(s)) return false;                                   // no letters

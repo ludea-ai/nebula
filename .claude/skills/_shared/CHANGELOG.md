@@ -8,6 +8,13 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
+## next (pending owner's OK)
+### New — you can switch it on
+- **Legal links at the bottom of the help screen** (legal notice, privacy), small and out of the way of young players — `meta.legalLinks: [{ label, url }]` — every game published on a website (Ludea's catalogue copies get Ludea's links).
+### Better — automatic
+- Web addresses and the author's name are no longer treated as texts to translate.
+- You are told when a newer engine exists (what it brings), and when your catalogue version is behind your game; `/update`, `/publish` (first publication or update), `/idea`.
+
 ## 2026-10-18.9
 ### New — you can switch it on
 - **Each mission offer can have its own rules** (one trip or a round trip, its own target, messages and counter — e.g. a small and a big treasure) — `missions.offers[].pickups / dests / target / messages / stat` — games with deliveries or treasure hunts.

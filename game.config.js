@@ -32,8 +32,9 @@ window.GAME = {
     shortName: "Nebula",
     tagline: "Look after the little glowing critters!",
     saveKey: "nebula-nursery",
+    legalLinks: [{ label: "Legal notice", url: "https://ludea.ai/legal/" }, { label: "Privacy", url: "https://ludea.ai/privacy/" }],
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v60",
+    assetVersion: "v61",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: true,
     coinIcon: "shard",                // the currency: star shards
