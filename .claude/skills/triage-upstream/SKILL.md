@@ -80,7 +80,7 @@ docs or the CHANGELOG — rewrite it.
    French (which game, what broke, back on build vN), reopen the batch's issues for that game and fix
    it in the next PR. Never leave a game broken while you investigate.
    **Contributors**: for every merged contribution/idea/bug that came from someone's report, add
-   them under "Engine contributions" in `ludea-ai/game-engine/CONTRIBUTORS.md` (name as credited or
+   them under "Engine contributions from creators" in `ludea-ai/game-engine/CONTRIBUTORS.md` (name as credited or
    GitHub login, link, one line: what it brought + issue numbers); skip if already listed with it.
    Reports from Ludea's own repos or maintainers are Ludea's work: don't list them (the engine is
    credited to "Ludea"). Commit it with the template's propagation commit.
