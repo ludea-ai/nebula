@@ -1,6 +1,6 @@
 {
- "version": "2026-10-18.8",
- "from": "ludea-ai/nebula@e3ff4a0",
+ "version": "2026-10-18.9",
+ "from": "ludea-ai/nebula@bc644b6",
  "files": {
   "engine.js": "1cd84bee2820f276ea5454c4ab7dce23a98e5595",
   "engine.css": "0455b4e42d27deb6cbeef538868cea3870545edc",
@@ -26,7 +26,7 @@
   ".claude/skills/_shared/probes/reveal.cjs": "62c549908dece146f19bb355cdfbad45d88f8cc1",
   ".claude/skills/_shared/probes/stress.cjs": "235c55beebcff83e9d113bbb4d74342ef1844c91",
   ".claude/skills/_shared/probes/systems.cjs": "0366076a3f56c460a2b8bae943d25ac60f6ce2bd",
-  ".claude/skills/_shared/probes/tour.cjs": "3e13b911aac69958b735a07690a9e7783fc7305d",
+  ".claude/skills/_shared/probes/tour.cjs": "192d65199f329d79d45a57eb7822db945a32552e",
   ".claude/skills/_shared/probes/watchdog.cjs": "3d0d0ad9863a2755ef5eeca7a4b50e6fcd668f37",
   ".claude/skills/_shared/prune-assets.cjs": "4e91efe4b0de8882bbee63d7fdf23c0f9d508ce8",
   ".claude/skills/_shared/publish-check.cjs": "d0729dc45100a0f78c38bb54d245e54f365e1017",
