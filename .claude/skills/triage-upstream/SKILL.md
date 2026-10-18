@@ -79,6 +79,10 @@ docs or the CHANGELOG — rewrite it.
    engine and version), push, wait for the deploy, check it plays live — then tell the owner in
    French (which game, what broke, back on build vN), reopen the batch's issues for that game and fix
    it in the next PR. Never leave a game broken while you investigate.
+   **Contributors**: for every merged contribution/idea/bug that came from someone's report, add
+   them under "Engine contributions" in `ludea-ai/game-engine/CONTRIBUTORS.md` (name as credited or
+   GitHub login, link, one line: what it brought + issue numbers); skip if already listed with it.
+   Commit it with the template's propagation commit.
 3. Label the PR `propagated`; comment the list of updated repos (+ skipped ones and why).
 4. Close the linked issues with a comment: "Integrated in engine <version> (nebula#<pr>),
    live in: …. Games outside the Ludea organisation get it with **sync-engine** from
