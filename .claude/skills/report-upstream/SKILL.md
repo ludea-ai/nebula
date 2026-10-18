@@ -50,7 +50,7 @@ environment), every `engine.js` edit, every skill/`_shared` edit made by capital
 
 ## 3. Write each issue (public — keep it clean)
 Title: `[kind] <short, generic description>` (no game name in the title).
-Body (Markdown, English first, then a short `#### En français` summary — Ludea is bilingual):
+Body (Markdown, **English** — every Ludea issue is in English, whatever the creator's language):
 ```
 <!-- ludea-report v1 kind=<bug|contribution|idea> game=<owner/repo> engine=<engine version> -->
 ### What

@@ -36,8 +36,8 @@ Plus the game's usual QA (they must be green before submitting):
   Commit + deploy it with the rest.
 
 ## 3. File the request (public issue on `ludea-ai/ludea-ai.github.io`)
-Write it in **English, with a French version** of the descriptive parts (Ludea is bilingual;
-the owner reads French).
+Write it in **English** (all Ludea issues are), except the catalogue description, which is given
+in both English and French (the catalogue is bilingual).
 Title: `[publish] <Game title> — <owner/repo>`. Body:
 ```
 <!-- ludea-publish v1 repo=<owner/repo> commit=<HEAD sha> engine=<engine version> -->

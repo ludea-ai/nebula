@@ -14,9 +14,10 @@ use **report-upstream**.
 the GitHub MCP tools or REST (`gh api repos/<o>/<r>/pulls?state=all`, `.../issues`, `.../labels`).
 Create a missing label before using it (`gh api -X POST repos/<o>/<r>/labels -f name=… -f color=…`).
 
-**Language:** the owner reads **French**. Issue comments stay in English (public, any creator), but
-the PR body starts with a **« Résumé pour validation »** section in French (what changes, for whom,
-what was tested, what was NOT, the decision asked), then the English details.
+**Language:** everything on GitHub (issue comments, PR bodies) is in **English** — international,
+like the repos. The PR body starts with a short **"Summary for approval"** in plain words (what
+changes, for whom, what was tested, what was NOT, the decision asked), then the details. Only the
+final summary to the owner (phase D, the scheduled run's notification) is in French.
 
 **Owner rule (decided 2026-10-18):** the agent qualifies, codes and tests on its own, but the
 engine changes reach `main` only through a **pull request the owner approves**. Once merged,
