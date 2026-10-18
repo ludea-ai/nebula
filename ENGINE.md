@@ -492,12 +492,22 @@ which also counts the `earned` stat when it is listed in `objectives.extraStats`
 ### `missions` (go to a destination)
 ```
 missions: { title, subtitle, stat:"missions", radius:80, color, marker:"<image key>", markerScale,
-  offers:[{ label, sub, icon, pay, heat? }], dests:[{ x, y, name }],
+  offers:[{ id, label, sub, icon, pay, heat?, …per-offer overrides }], dests:[{ x, y, name }],
   takenMessage("{d}"), hotMessage("{d}"), doneMessage("{p}"), busyMessage,
   clearsChase:true, chaseEndMessage,   // completing a mission ends the chase (pursuers drive off + fade)
   pickups:[{ x, y, name }], target:"<image key>", targetScale, cargoIcon, cargoLabel,
   pickedMessage("{d}"), hotPickedMessage("{d}") }   // takenMessage may use {p} (pickup name)
 ```
+**Per-offer overrides**: an offer may carry its own `pickups` (array, or `false` = one leg even when the
+mission-wide list exists), `dests`, `target` / `marker` (`false` = none), `targetScale` / `markerScale`,
+messages (`takenMessage`, `hotMessage`, `pickedMessage`, `hotPickedMessage`, `doneMessage`), an extra
+`stat` counted on completion (on top of `missions.stat`; usable by objectives / unlocks) and the chase's
+`caughtKeepsMission` / `caughtMessage` for its own errands — e.g. a small treasure = one leg to a hidden
+chest, a big treasure = pick the chest up then bring it home with a pursuer (a treasure-hunt game); in Nebula a one-leg
+star post (`pickups:false`) and a rare egg with its own stat (an unlock) that the drones can still snatch.
+Give each offer an `id`: the chosen offer is saved as `state.mission.offer` = its id (its index when it has
+none), so reordering `offers` never gives a saved mission another offer's settings. Older saves without it
+use the mission-wide settings.
 With `pickups`, a mission has **two legs**: go and pick the cargo up (the `marker`), then bring it
 to the destination, shown as a flat ground `target` decal; a HUD chip (`cargoIcon`) shows you carry
 it, and a hot offer's chase starts at pickup. Without `pickups`, one leg as below.
@@ -510,10 +520,13 @@ it; reaching it pays `pay`, counts `stat`, and saves. `heat` > 0 starts a chase.
 chase: { sprite, dirSheet?:{cols}, scale, originY, icon, label, maxLevel:3, maxUnits:3, speed,
   catchRadius, catchSeconds, loseRadius, loseAfter, fine, spawnDist, escapedMessage, caughtMessage("{f}") }
 ```
+`caughtKeepsMission: true` (gentler, kids): when caught, the pursuer only takes its `fine` and leaves —
+the mission goes on (default: the mission is lost). A mission offer may override `caughtKeepsMission`
+and `caughtMessage` for its own errands (see missions).
 The HUD shows `maxLevel` icons (lit = current level). Up to `maxUnits` pursuers spawn
 `spawnDist` away and home in (sliding along collisions; a dirSheet sprite turns and blinks
-between its frames). Staying within `catchRadius` for `catchSeconds` = caught (fine, mission
-lost); staying beyond `loseRadius` for `loseAfter` s lowers the level by one. A restyle with
+between its frames). Staying within `catchRadius` for `catchSeconds` = caught (the `fine`, and the
+mission is lost unless `caughtKeepsMission`; the pursuers leave either way); staying beyond `loseRadius` for `loseAfter` s lowers the level by one. A restyle with
 `clearsChase` (or `api.clearHeat()`) ends it.
 
 ### `models` (buy creatures with stats)

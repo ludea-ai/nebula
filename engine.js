@@ -279,7 +279,7 @@ function statKeys() {
   ACTIONS.forEach((a) => { if (a.stat) keys.add(a.stat); });
   keys.add("births"); keys.add("decor");
   (G.objectives && G.objectives.extraStats || []).forEach((k) => keys.add(k));
-  if (G.missions) keys.add(G.missions.stat || "missions");
+  if (G.missions) { keys.add(G.missions.stat || "missions"); (G.missions.offers || []).forEach((o) => { if (o.stat) keys.add(o.stat); }); }
   if (G.race) keys.add(G.race.stat || "raceWin");
   return [...keys];
 }
@@ -762,7 +762,7 @@ function buildHud() {
   if (META.showDay !== false) html += chip("chip-day", "calendar", T("dayLabel", "Day"), "hud-day");
   if (CREATURE && META.showCreatureCount !== false) html += chip("chip-cap", CREATURE.icon || "heart", CREATURE.label || "creatures", "hud-cap");
   if (LEVELS.length) html += chip("chip-level", "trophy", T("levelLabel", "Level"), "hud-level");
-  if (G.missions && G.missions.pickups) html += `<span class="resource cargo hidden" id="chip-cargo" title="${esc(stripIcons(G.missions.cargoLabel || ""))}"><span class="r-ico">${iconHTML(G.missions.cargoIcon || G.missions.marker || "gift")}</span><b>1</b></span>`;
+  if (G.missions && (G.missions.pickups || (G.missions.offers || []).some((o) => o.pickups && o.pickups.length))) html += `<span class="resource cargo hidden" id="chip-cargo" title="${esc(stripIcons(G.missions.cargoLabel || ""))}"><span class="r-ico">${iconHTML(G.missions.cargoIcon || G.missions.marker || "gift")}</span><b>1</b></span>`;
   if (G.chase) html += `<span class="resource heat hidden" id="chip-heat" title="${esc(stripIcons(G.chase.label || ""))}"><span class="heat-icons"></span></span>`;
   bar.innerHTML = html;
   if (G.chase) refreshHeat();
@@ -2280,11 +2280,14 @@ function updateGuide(time) {
     if (inView) edge.classList.add("hidden");
     else {
       const cx = v.centerX, cy = v.centerY, ang = Math.atan2(tg.y - cy, tg.x - cx);
-      const r = sc.game.canvas.getBoundingClientRect();
-      const hw = r.width / 2 - 34, hh = r.height / 2 - 70;
-      const k = Math.min(Math.abs(hw / (Math.cos(ang) || 1e-6)), Math.abs(hh / (Math.sin(ang) || 1e-6)));
-      edge.style.left = (r.left + r.width / 2 + Math.cos(ang) * k) + "px";
-      edge.style.top = (r.top + r.height / 2 + Math.sin(ang) * k) + "px";
+      // keep the pointer in the free band between the HUD bar and the bottom panel (never over a button)
+      const r = sc.game.canvas.getBoundingClientRect(), bar = document.querySelector("#screen-game .top-bar"), pn = $("panel");
+      const barB = bar ? bar.getBoundingClientRect().bottom : r.top, pr = pn && pn.offsetHeight ? pn.getBoundingClientRect() : null;
+      const top = Math.max(r.top, barB) + 34, bot = Math.min(r.bottom, pr && pr.top > top + 80 ? pr.top : r.bottom) - 34;
+      const lft = r.left + 34, rgt = r.right - 34, mx = (lft + rgt) / 2, my = (top + bot) / 2;
+      const k = Math.min(Math.abs((rgt - lft) / 2 / (Math.cos(ang) || 1e-6)), Math.abs((bot - top) / 2 / (Math.sin(ang) || 1e-6)));
+      edge.style.left = (mx + Math.cos(ang) * k) + "px";
+      edge.style.top = (my + Math.sin(ang) * k) + "px";
       edge.style.setProperty("--ang", (ang * 180 / Math.PI) + "deg");
       edge.classList.remove("hidden");
     }
@@ -3445,23 +3448,38 @@ function openMissions() {
 // With missions.pickups, a mission has two legs: first go and pick the cargo up (marker =
 // missions.marker), then bring it to the destination (a ground target = missions.target).
 // A "hot" offer starts its chase once the cargo is picked up.
+// An offer may override the mission-wide settings for its own missions: pickups (array, or false =
+// one leg even when the others have two), dests, target / marker (false = none), the messages
+// (takenMessage, hotMessage, pickedMessage, hotPickedMessage, doneMessage), an extra `stat` it
+// counts on completion (e.g. a "big treasure" counter that drives its own unlocks), and how a chase
+// ends when caught (caughtKeepsMission, caughtMessage — see chase). The save remembers the offer by
+// its `id` (index when it has none), so reordering offers in the config keeps saved missions right.
+function offerRef(of) { const i = (MISSIONS.offers || []).indexOf(of); return i < 0 ? null : (of.id != null ? of.id : i); }
+function missionOffer(m) {
+  if (!m || m.offer == null || !MISSIONS) return {};
+  const offers = MISSIONS.offers || [];
+  return (typeof m.offer === "number" ? offers[m.offer] : offers.find((o) => o.id === m.offer)) || {};
+}
+function mOpt(m, k) { const o = missionOffer(m); return o[k] !== undefined ? o[k] : MISSIONS[k]; }
 function missionGoal(m) { return m.stage === "pickup" ? { x: m.px, y: m.py, name: m.pname } : { x: m.x, y: m.y, name: m.name }; }
 function farPick(list, from, avoid) {
   const far = list.filter((d) => Math.hypot(d.x - from.x, d.y - from.y) > 300 && (!avoid || Math.hypot(d.x - avoid.x, d.y - avoid.y) > 300));
   return pick(far.length ? far : list);
 }
 function takeMission(of) {
-  const dests = MISSIONS.dests || [{ x: WORLD.w / 2, y: WORLD.h / 2, name: "" }];
-  const pk = MISSIONS.pickups && MISSIONS.pickups.length ? farPick(MISSIONS.pickups, player) : null;
+  const probe = { offer: offerRef(of) };
+  const dests = mOpt(probe, "dests") || [{ x: WORLD.w / 2, y: WORLD.h / 2, name: "" }];
+  const pks = mOpt(probe, "pickups");
+  const pk = pks && pks.length ? farPick(pks, player) : null;
   const d = farPick(dests, pk || player, pk);
-  state.mission = { x: d.x, y: d.y, name: d.name || "", pay: of.pay || 30, heat: of.heat || 0 };
+  state.mission = { x: d.x, y: d.y, name: d.name || "", pay: of.pay || 30, heat: of.heat || 0, offer: probe.offer };
   if (pk) Object.assign(state.mission, { stage: "pickup", px: pk.x, py: pk.y, pname: pk.name || "" });
   buildMissionVisual(); refreshCargo();
   Sound.play("open");
-  const fill = (t) => t.replace("{d}", state.mission.name).replace("{p}", state.mission.pname || "");
-  if (pk) message(fill(MISSIONS.takenMessage || L("Pick up the cargo at {p}!")));
-  else if (of.heat) { addHeat(of.heat); message(fill(MISSIONS.hotMessage || MISSIONS.takenMessage || L("Go to {d}!"))); }
-  else message(fill(MISSIONS.takenMessage || L("Go to {d}!")));
+  const m = state.mission, fill = (t) => t.replace("{d}", m.name).replace("{p}", m.pname || "");
+  if (pk) message(fill(mOpt(m, "takenMessage") || L("Pick up the cargo at {p}!")));
+  else if (of.heat) { addHeat(of.heat); message(fill(mOpt(m, "hotMessage") || mOpt(m, "takenMessage") || L("Go to {d}!"))); }
+  else message(fill(mOpt(m, "takenMessage") || L("Go to {d}!")));
   refreshHud(); save();
 }
 function pickUpCargo() {
@@ -3470,7 +3488,7 @@ function pickUpCargo() {
   buildMissionVisual(); refreshCargo();
   Sound.play("reward");
   emitBurst(player.x, player.y, { shape: "star", colors: ["#fff2a8", "#ffffff"], count: 8, y0: 50, spread: 40 });
-  const t = (m.heat ? (MISSIONS.hotPickedMessage || MISSIONS.pickedMessage) : MISSIONS.pickedMessage) || L("Now deliver it to {d}!");
+  const t = (m.heat ? (mOpt(m, "hotPickedMessage") || mOpt(m, "pickedMessage")) : mOpt(m, "pickedMessage")) || L("Now deliver it to {d}!");
   message(t.replace("{d}", m.name));
   if (m.heat) addHeat(m.heat);
   refreshHud(); save();
@@ -3486,10 +3504,12 @@ function buildMissionVisual() {
   const col = hexInt(MISSIONS.color || "#4fe0a0"), m = state.mission, g = missionGoal(m);
   msRing = sc.add.graphics().setDepth(-15);
   const deliver = m.stage === "deliver" || !m.stage;
-  const tgt = deliver && MISSIONS.target && sc.textures.exists(MISSIONS.target) ? MISSIONS.target : null;
-  const key = tgt || (MISSIONS.marker && sc.textures.exists(MISSIONS.marker) ? MISSIONS.marker : null);
+  const tKey = mOpt(m, "target"), mKey = mOpt(m, "marker");
+  const tgt = deliver && tKey && sc.textures.exists(tKey) ? tKey : null;
+  const key = tgt || (mKey && sc.textures.exists(mKey) ? mKey : null);
   if (key) {
-    msMarker = sc.add.image(g.x, g.y, key).setOrigin(0.5, tgt ? 0.5 : 0.9).setScale((tgt ? (MISSIONS.targetScale || 1) : (MISSIONS.markerScale || 1)) / RES(key)).setDepth(tgt ? -14 : g.y + 1);
+    msMarker = sc.add.image(g.x, g.y, key).setOrigin(0.5, tgt ? 0.5 : 0.9).setScale((tgt ? (mOpt(m, "targetScale") || 1) : (mOpt(m, "markerScale") || 1)) / RES(key)).setDepth(tgt ? -14 : g.y + 1);
+    msMarker._scKey = tgt;
     msMarker._scGround = !!tgt;
   }
   msArrow = sc.add.image(0, 0, ensureShape("arrow")).setTint(col).setScale(0.6).setDepth(99996);
@@ -3506,7 +3526,7 @@ function missionTick(dt, now) {
     msRing.lineStyle(5, col, 0.9); msRing.strokeEllipse(g.x, g.y, r * 2.2, r * 1.2);
   }
   if (msMarker) {
-    if (msMarker._scGround) { const k = (MISSIONS.targetScale || 1) / RES(MISSIONS.target) * (1 + Math.sin(now / 300) * 0.05); msMarker.setScale(k); }
+    if (msMarker._scGround) { const k = (mOpt(m, "targetScale") || 1) / RES(msMarker._scKey) * (1 + Math.sin(now / 300) * 0.05); msMarker.setScale(k); }
     else msMarker.y = g.y - 6 + Math.sin(now / 300) * 6;
   }
   const ang = Math.atan2(g.y - player.y, g.x - player.x), dist = Math.hypot(g.x - player.x, g.y - player.y);
@@ -3521,12 +3541,13 @@ function completeMission() {
   const m = state.mission; if (!m) return;
   state.mission = null; clearMissionVisual(); refreshCargo();
   earn(m.pay); flyReward(player.x, player.y - 60, "+" + m.pay + " " + coinTok());
-  const st = MISSIONS.stat || "missions";
+  const st = MISSIONS.stat || "missions", ost = missionOffer(m).stat;
   state.stats[st] = (state.stats[st] || 0) + 1;
+  if (ost && ost !== st) state.stats[ost] = (state.stats[ost] || 0) + 1;
   state.actionsSinceRest = (state.actionsSinceRest || 0) + 1;
   emitBurst(player.x, player.y, { shape: "star", colors: ["#fff2a8", "#ffd24a", "#ffffff"], count: 12, y0: 50, spread: 50 });
   Sound.play("goal");
-  message((MISSIONS.doneMessage || L("{i:check} +{p}")).replace("{p}", m.pay));
+  message((mOpt(m, "doneMessage") || L("{i:check} +{p}")).replace("{p}", m.pay));
   // A delivered mission ends the chase it started: pursuers drive off and fade out
   // (missions.clearsChase:false keeps them on your tail).
   if (CHASE && MISSIONS.clearsChase !== false && (state.heat || 0) > 0) {
@@ -3540,7 +3561,8 @@ function completeMission() {
 // chase = { sprite, dirSheet?:{cols}, scale, icon, maxLevel, maxUnits, speed, catchRadius, catchSeconds,
 //   loseRadius, loseAfter, fine, spawnDist, escapedMessage, caughtMessage("{f}") }
 // Missions with heat raise the level; pursuers spawn around the player and home in; staying
-// close for catchSeconds = caught (a fine + the mission is lost). Lose them by staying far
+// close for catchSeconds = caught (a fine + the mission is lost; with caughtKeepsMission — on the
+// chase, or overridden by the current mission's offer — only the fine: the pursuers leave, the mission goes on). Lose them by staying far
 // for loseAfter seconds (−1 level each time), or clear it (e.g. a restyle with clearsChase).
 const CHASE = G.chase || null;
 let chasers = [], catchT = 0, evadeT = 0;
@@ -3609,10 +3631,15 @@ function chaseTick(dt) {
 function caught() {
   const fine = Math.min(state.coins, CHASE.fine || 40);
   state.coins -= fine;
-  if (state.mission) { state.mission = null; clearMissionVisual(); refreshCargo(); }
-  clearHeat(); Sound.play("error");
+  // caughtKeepsMission: the pursuer only takes its fine and leaves; the mission goes on (gentler, kids).
+  // The current mission's offer may override it (and caughtMessage) for its own errands.
+  const of = MISSIONS && state.mission ? missionOffer(state.mission) : {};
+  const keep = !!(of.caughtKeepsMission !== undefined ? of.caughtKeepsMission : CHASE.caughtKeepsMission);
+  const msg = of.caughtMessage || CHASE.caughtMessage || L("Caught! −{f}");
+  if (state.mission && !keep) { state.mission = null; clearMissionVisual(); refreshCargo(); }
+  clearHeat(keep); Sound.play("error");
   if (sc) sc.cameras.main.shake(260, 0.006);
-  message((CHASE.caughtMessage || L("Caught! −{f}")).replace("{f}", fine));
+  message(msg.replace("{f}", fine));
   refreshHud(); save();
 }
 

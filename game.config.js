@@ -33,7 +33,7 @@ window.GAME = {
     tagline: "Look after the little glowing critters!",
     saveKey: "nebula-nursery",
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v59",
+    assetVersion: "v60",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: true,
     coinIcon: "shard",                // the currency: star shards
@@ -460,14 +460,22 @@ window.GAME = {
             logs: { xs: [640, 1040, 1440, 1840, 2240], dec: 0, sprite: "comet_rock", scale: 1 } },
   },
 
-  /* ---- Deliveries: pick a crate up, bring it to a ground target. Rare cargo → drones chase you ---- */
+  /* ---- Deliveries: pick a crate up, bring it to a ground target. Rare cargo → drones chase you.
+     Each offer may override the mission-wide settings (per-offer overrides): the star post is ONE leg
+     (pickups:false), the express and the egg have their own messages, the egg counts its own stat
+     (an unlock) and is the one errand the drones can still ruin (caughtKeepsMission:false). ---- */
   missions: {
     title: "{i:crate} Delivery Dock", subtitle: "Pick a delivery:",
     stat: "jobs", radius: 80, color: "#6ef0a0", marker: "crate", markerScale: 0.6,
     offers: [
-      { label: "Easy delivery", sub: "Fetch the crate, drop it on the target: {i:shard} 15", icon: "crate", pay: 15 },
-      { label: "Express parcel", sub: "{i:shard} 25 — one drone will try to snatch it {i:drone}", icon: "crate", pay: 25, heat: 1 },
-      { label: "Rare comet egg", sub: "{i:shard} 40 — but snatcher drones chase you once you hold it {i:drone}{i:drone}", icon: "drone", pay: 40, heat: 2 },
+      { id: "easy", label: "Easy delivery", sub: "Fetch the crate, drop it on the target: {i:shard} 15", icon: "crate", pay: 15 },
+      { id: "post", label: "Star post", sub: "Fly a little gift straight to its ring: {i:shard} 10", icon: "gift", pay: 10, pickups: false,
+        takenMessage: "{i:gift} Star post for {d}! Follow the arrow.", doneMessage: "{i:check} Post delivered! +{p}" },
+      { id: "express", label: "Express parcel", sub: "{i:shard} 25 — one drone will try to pinch some shards {i:drone}", icon: "crate", pay: 25, heat: 1,
+        hotPickedMessage: "{i:drone} Got the parcel… a drone is coming! Hurry to {d}!" },
+      { id: "egg", label: "Rare comet egg", sub: "{i:shard} 40 — but snatcher drones chase you once you hold it {i:drone}{i:drone}", icon: "drone", pay: 40, heat: 2,
+        stat: "eggRuns", caughtKeepsMission: false, caughtMessage: "{i:drone} The drones snatched the egg! −{f}",
+        hotPickedMessage: "{i:drone} Got the egg… here come the drones! Hurry to {d}!", doneMessage: "{i:egg} The comet egg is safe! +{p}" },
     ],
     pickups: [{ x: 860, y: 170, name: "the north ring" }, { x: 2630, y: 1300, name: "the east ring" },
               { x: 420, y: 1490, name: "the west dock" }, { x: 2100, y: 1930, name: "the south ring" }, { x: 2050, y: 760, name: "the shop street" }],
@@ -476,19 +484,21 @@ window.GAME = {
             { x: 1500, y: 1930, name: "the south ring" }, { x: 2630, y: 400, name: "the north-east ring" }, { x: 1700, y: 1450, name: "the park gate" }],
     takenMessage: "{i:crate} Fetch the crate at {p}. Follow the arrow!",
     pickedMessage: "{i:crate} Got it! Bring it to the target: {d}.",
-    hotPickedMessage: "{i:drone} Got the egg… here come the drones! Hurry to {d}!",
+    hotPickedMessage: "{i:drone} Got it… here come the drones! Hurry to {d}!",
     doneMessage: "{i:check} Delivered! +{p}",
     busyMessage: "{i:crate} Finish your current delivery first!",
     clearsChase: true, chaseEndMessage: "{i:drone} Delivered — the drones give up and fly home.",
   },
 
-  /* ---- Snatcher drones (gentle chase): stay away from them, or get a makeover at the salon ---- */
+  /* ---- Snatcher drones (gentle chase): stay away from them, or get a makeover at the salon.
+     caughtKeepsMission: a drone only pinches a few shards and flies off, the delivery goes on
+     (the rare egg offer overrides it: there, the drones snatch the egg) ---- */
   chase: {
     sprite: "drone", dirSheet: { cols: 2 }, scale: 0.8, originY: 0.7, icon: "drone", label: "Drones",
     maxLevel: 3, maxUnits: 2, speed: 210, catchRadius: 60, catchSeconds: 3.5,
     loseRadius: 720, loseAfter: 6, fine: 12, spawnDist: 620,
     escapedMessage: "{i:drone} You left the drones behind!",
-    caughtMessage: "{i:drone} The drones snatched the egg! −{f}",
+    caughtKeepsMission: true, caughtMessage: "{i:drone} A drone pinched {f} shards and flew off. Keep going!",
   },
 
   /* ---- Hatchery: rare critters with better mount stats ---- */
@@ -536,6 +546,8 @@ window.GAME = {
       scenery: { x: 1760, y: 1640, sprite: "spire", scale: 1, glow: "#8ff6ff", glowY: 90, box: { dx: -18, dy: -12, w: 36, h: 16 } } },
     { id: "rich", when: { coins: 120 }, message: "{i:shard} So many shards — a golden crystal appears!",
       scenery: { x: 520, y: 1100, sprite: "crystal", scale: 0.8, glow: "#ffd24a", anim: "pulse", box: { dx: -36, dy: -16, w: 72, h: 20 } } },
+    { id: "eggnest", when: { stat: "eggRuns", atLeast: 1 }, message: "{i:egg} The rare egg is safe — a blue crystal grows by the Delivery Dock!",
+      scenery: { x: 1395, y: 1050, sprite: "crystal_b", scale: 0.7, glow: "#8ff6ff", glowY: 70, anim: "pulse", box: { dx: -34, dy: -16, w: 68, h: 20 } } },
     { id: "family", when: (s) => (s.stats.births || 0) >= 1, message: "{i:egg} A glow plant blooms for the new hatchling!",
       scenery: { x: 1080, y: 560, sprite: "alienplant", scale: 0.65, anim: "sway", box: false } },
   ],
@@ -577,7 +589,7 @@ window.GAME = {
     "<b>Welcome to Nebula Station!</b> Look after your critters, ride them around the station and make deliveries. This demo shows everything the engine can do.",
     "{i:hand} <b>Move:</b> tap the floor — your keeper floats there, around obstacles (double-tap to run). Tap a critter or a building to use it. (Keyboard: arrows or WASD/ZQSD.)",
     "{i:heart} <b>Care:</b> {i:battery} Energy (Feed, costs {i:nectar} nectar), {i:ball} Fun (Play) and {i:sparkle} Sparkle (Polish — zoom in and rub the dust away). A full Fun makes a critter beam with happy eyes!",
-    "{i:crate} <b>Deliveries:</b> at the <b>Delivery Dock</b>, pick a job. Follow the arrow to the crate, pick it up, then drop it on the glowing target. Express and rare jobs pay more but {i:drone} drones chase you: outrun them, or ride into the {i:palette} <b>Glow Salon</b> for a makeover.",
+    "{i:crate} <b>Deliveries:</b> at the <b>Delivery Dock</b>, pick a job. Follow the arrow to the crate, pick it up, then drop it on the glowing target ({i:gift} a star post gift goes straight to its target). Express and rare jobs pay more but {i:drone} drones chase you: a drone that catches you pinches a few shards, and the drones snatch a rare egg! Outrun them, or ride into the {i:palette} <b>Glow Salon</b> for a makeover.",
     "{i:ride} <b>Ride:</b> hop on a grown critter, cruise the <b>Star Ring</b> road and {i:jump} jump the comet rocks and the beams of the <b>Gravity Park</b>. Riding uses Energy: recharge on the {i:pad} <b>Energy Pad</b>.",
     "{i:flag} <b>Race:</b> while riding, tap Race. You start behind 5 rival riders: steer left and right to overtake them and dodge the asteroids. The higher you finish, the more you win! {i:drone} <b>Escape:</b> a security drone starts behind you, reach the finish before it catches you.",
     "{i:shop} <b>Star Market:</b> nectar, a bigger nursery, decorations and new critters. {i:egg} <b>Hatchery:</b> rare, faster critters. {i:portal} <b>Wormhole:</b> call a wild critter.",
