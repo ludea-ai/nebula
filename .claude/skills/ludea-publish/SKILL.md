@@ -27,14 +27,17 @@ Plus the game's usual QA (they must be green before submitting):
   sentence that Ludea games for children can't contain them.
 - Engine-layer drift → run **report-upstream** first (the reviewer will see it otherwise).
 - The game must be **live** (GitHub Pages) and the repo **public**.
-- **Author** (shown on the catalogue card and in the game's repo description): ask the creator
-  how they want to be credited — a name or pseudonym (never a child's real full name; a first
-  name or pseudonym is fine) — and record it in `game.config.js` as
-  `meta.author: { name: "<as credited>", github: "<their GitHub login>", url: "<optional site>" }`
-  (`github` = the repo owner's login by default, `gh api user --jq .login` or the remote).
+- **Author** (shown on the catalogue card as « par … » / "by …", linked to GitHub): fill it
+  AUTOMATICALLY from the repo — `node .claude/skills/_shared/upstream.cjs author` (owner + human
+  contributors, real names from their commits; bots and Claude left out). Write it in
+  `game.config.js` as `meta.author: { name, github, url, contributors: [{ login, name }] }` and
+  confirm with ONE simple question (« Sur la fiche, on affiche : par Jean-Louis Rigau (@jlrigau).
+  C'est bon ? ») — they may prefer a pseudonym. Never a child's full real name.
   Commit + deploy it with the rest.
 
 ## 3. File the request (public issue on `ludea-ai/ludea-ai.github.io`)
+Write it in **English, with a French version** of the descriptive parts (Ludea is bilingual;
+the owner reads French).
 Title: `[publish] <Game title> — <owner/repo>`. Body:
 ```
 <!-- ludea-publish v1 repo=<owner/repo> commit=<HEAD sha> engine=<engine version> -->
@@ -48,6 +51,7 @@ Title: `[publish] <Game title> — <owner/repo>`. Body:
 - **Modes / tags:** <care, riding, race, treasure hunt…>
 ### Author
 - **Credited as:** <meta.author.name> · **GitHub:** @<meta.author.github> · **Link:** <meta.author.url or none>
+- **Contributors:** @<login> (<name>), … — linked on the card as open-source contributors
 - The original repo stays theirs; Ludea serves a reviewed copy and credits them on the card.
 ### Readiness report
 <publish-check output (blockers: none), tour result, i18n --check, engine drift: none / reported in #…>
@@ -60,6 +64,7 @@ Route: GitHub MCP `issue_write` → `gh issue create -R ludea-ai/ludea-ai.github
 « Ta demande est envoyée (lien). L'équipe Ludea va vérifier ton jeu — surtout qu'il est bien
 adapté aux enfants — puis il apparaîtra sur ludea.ai. Tu seras prévenu sur cette page. »
 Explain they can keep improving their game; a new version means a new `/ludea-publish`.
+Talk to the creator in THEIR language (the one they write in).
 
 ## Guard-rails
 - Never submit with a blocking item left, or with a game that is not live.

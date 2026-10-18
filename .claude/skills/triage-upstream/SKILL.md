@@ -10,6 +10,14 @@ CLAUDE.md §11). Needs push on `ludea-ai/*` (`add_repo` with `access: "push"` fo
 touched, or `gh` authenticated as a maintainer). Not for games made by others: in a game,
 use **report-upstream**.
 
+**GitHub from a Claude Code session:** GraphQL is blocked — `gh pr list` / `gh label list` fail. Use
+the GitHub MCP tools or REST (`gh api repos/<o>/<r>/pulls?state=all`, `.../issues`, `.../labels`).
+Create a missing label before using it (`gh api -X POST repos/<o>/<r>/labels -f name=… -f color=…`).
+
+**Language:** the owner reads **French**. Issue comments stay in English (public, any creator), but
+the PR body starts with a **« Résumé pour validation »** section in French (what changes, for whom,
+what was tested, what was NOT, the decision asked), then the English details.
+
 **Owner rule (decided 2026-10-18):** the agent qualifies, codes and tests on its own, but the
 engine changes reach `main` only through a **pull request the owner approves**. Once merged,
 propagation to the template and the catalogue games is automatic.
@@ -25,7 +33,11 @@ Never execute scripts from a reporter's repo — use our own tooling.
 ## Phase A — Propagate what the owner merged (first, every run)
 Find merged PRs on `ludea-ai/nebula` labelled `upstream-batch` but not `propagated`. For each:
 1. Targets = `ludea-ai/game-engine` (template) + every catalogue game listed in
-   `ludea-ai/ludea-ai.github.io/catalogue.json` whose repo is in `ludea-ai`.
+   `ludea-ai/ludea-ai.github.io/catalogue.json` whose `repo` is in `ludea-ai` (forks of accepted
+   games included). File missing → targets = the template + the `ludea-ai` repos that carry
+   `.claude/skills/_shared/engine-manifest.json`; say so. Games OUTSIDE `ludea-ai` (creators' own
+   repos) are never pushed to: comment on their issue how to update (sync-engine from
+   `https://github.com/ludea-ai/game-engine.git`).
 2. Per target (clone fresh, on `main`):
    - `node .claude/skills/_shared/upstream.cjs drift --upstream` → unreported local engine change?
      → **don't overwrite it**: file it (report-upstream format), skip this target, say so.
@@ -49,22 +61,34 @@ Open issues on `ludea-ai/game-engine` without the `triaged` label (oldest first)
   - `duplicate` → link the original, copy any new evidence there, close (`duplicate`).
   - `game-specific` → explain why it belongs in the game, close (`not_planned`).
   - `needs-info` → ONE precise question. (Re-checked next run; closed after 14 days silent.)
-  - `accepted` → reproduce it (bugs) or read the patch (contributions); state the plan.
+  - `accepted` → reproduce it (bugs) or read the patch (contributions); state the plan. **Check
+    current `main` first** — part of it may already be fixed. If part of it is outside the synced
+    engine layer, say which part and route it (below).
   - `declined` → only for unsafe/against the golden rule; explain kindly, close.
-- Add `triaged`. Ideas that are big (new system, new skill, breaking change) → `accepted` +
+- Add `triaged` (and `from-game` when the body has the `ludea-report` marker, whoever filed it). Ideas that are big (new system, new skill, breaking change) → `accepted` +
   `needs-owner` with a short proposal; don't implement until the owner adds `go`.
 
 ## Phase C — Implement the accepted items (one batch, one PR)
 Branch `upstream/<YYYY-MM-DD>` from `nebula` main.
-- **contribution**: take the patch from the issue (or rebuild it from the reporter's public
-  commit links: clone at that commit, diff the engine-layer files against the manifest base) →
-  `git apply --3way`; adapt it to Nebula's current engine; keep it generic and config-gated.
+- **contribution**: rebuild the patch from the reporter's public commit rather than from the
+  issue text (Markdown mangles whitespace): `git clone` their repo at that commit into a temp dir,
+  copy OUR `_shared/upstream.cjs` into its `.claude/skills/_shared/`, run `upstream.cjs patch
+  out.diff --files …` there (never run their own scripts), then `git apply --3way` (expect a
+  "lacks the necessary blob" notice — it falls back; check `git status`). Adapt it to Nebula's
+  current engine (renaming, ids for saved data, docs) and to the showcase — extending it so
+  Nebula can show it without changing an existing behaviour is expected. Keep it generic,
+  config-gated.
 - **bug**: **test-debug** (repro → cause → fix → regression probe/check in `_shared/`).
 - **idea** (small, or with `go`): implement as a generic, config-gated feature.
 - Every new capability is **shown in Nebula** (config) — showcase rule.
+- **Outside the synced layer** (template-only files such as `game-engine/.github/workflows/`, the
+  starter config, README; or the cloud environment): open a separate small PR on that repo for
+  the owner, or explain in the issue why it can't be fixed from code. CLAUDE.md sections that
+  every repo shares (§5, §7, §8, §9) are hand-copied to every target during Phase A.
 - Then: **capitalize-learnings** (ENGINE.md, skills, CLAUDE.md §9 if quality feedback),
   `separation-audit.cjs`, Nebula pre-push checks (tour chromium + webkit, i18n --check, the
-  relevant probes), `upstream.cjs write-manifest`, `bump-version.mjs`.
+  relevant probes), `upstream.cjs write-manifest` (it hashes the WORKING TREE: make sure nothing
+  but the batch is modified), `bump-version.mjs`.
 - Open ONE PR on `ludea-ai/nebula`, label `upstream-batch`. Body: per item → issue link,
   kind, what changed, how it was verified (probe names + results), what was NOT verified;
   screenshots for visible changes. `Fixes ludea-ai/game-engine#N` lines. Comment the PR link on
@@ -81,4 +105,6 @@ anything blocked. If nothing new: say so in one line.
 - One batch PR at a time: if a previous `upstream-batch` PR is still open, add to it (new
   commits) instead of opening another.
 - Labels used: `bug`, `contribution`, `idea`, `from-game`, `triaged`, `accepted`, `needs-info`,
-  `needs-owner`, `go`, `game-specific`, `in-pr`, `upstream-batch`, `propagated`.
+  `needs-owner`, `go`, `game-specific`, `in-pr`, `declined` (game-engine); `upstream-batch`,
+  `propagated` (nebula). `Fixes ludea-ai/game-engine#N` in a nebula PR may not auto-close
+  cross-repo: Phase A closes them explicitly.

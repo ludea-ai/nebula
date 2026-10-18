@@ -18,6 +18,7 @@
 //   node .claude/skills/_shared/upstream.cjs write-manifest [--from <ref>]
 //                                         # after a sync / an engine commit upstream; --from <first commit>
 //                                         # bootstraps a game created before the manifest existed
+//   node .claude/skills/_shared/upstream.cjs author                # the creator, from the repo's GitHub data (for meta.author)
 //   node .claude/skills/_shared/upstream.cjs url --repo o/r --title T --body-file F
 //                                                                  # prefilled "new issue" link (fallback)
 //   node .claude/skills/_shared/upstream.cjs log --add kind:key --issue URL [--files a,b]
@@ -184,6 +185,35 @@ function writeManifest(fromRef) {
   console.log(same ? `engine-manifest unchanged (${version})` : `engine-manifest → ${version} (${Object.keys(files).length} files)`);
 }
 
+// Author of the game, from what the repo itself says (sessions can only call repo-scoped GitHub
+// endpoints): owner + human contributors (bots / Claude left out), real names taken from their
+// commits. Without gh, falls back to git log (+ GitHub noreply e-mails, which carry the login).
+const BOT = /\[bot\]$|^(claude|github-actions|dependabot|actions-user)$/i;
+function author() {
+  const slug = repoSlug(); const owner = slug ? slug.split("/")[0] : null;
+  const names = {}; // login → name from commits
+  const ghJson = (p) => { const t = tryS(`gh api ${p}`); try { return JSON.parse(t); } catch (e) { return null; } };
+  const repo = slug && ghJson(`repos/${slug}`);
+  const commits = slug && ghJson(`repos/${slug}/commits?per_page=100`);
+  (Array.isArray(commits) ? commits : []).forEach((c) => { if (c.author && c.author.login && !names[c.author.login]) names[c.author.login] = c.commit.author.name; });
+  tryS("git log --format=%an%x09%ae").split("\n").filter(Boolean).forEach((l) => {
+    const [n, e] = l.split("\t"); const m = (e || "").match(/^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/);
+    if (m && !names[m[1]]) names[m[1]] = n;
+  });
+  let contrib = ghJson(`repos/${slug}/contributors`);
+  contrib = (Array.isArray(contrib) ? contrib : Object.keys(names).map((login) => ({ login, type: "User" })))
+    .filter((c) => c.type !== "Bot" && !BOT.test(c.login))
+    .map((c) => ({ login: c.login, name: names[c.login] || null, url: `https://github.com/${c.login}` }));
+  const ownerIsOrg = repo && repo.owner && repo.owner.type === "Organization";
+  const main = ownerIsOrg ? (contrib[0] || { login: owner }) : { login: owner };
+  return {
+    name: names[main.login] || main.login, github: main.login, url: `https://github.com/${main.login}`,
+    owner: owner, ownerIsOrg: !!ownerIsOrg,
+    contributors: contrib,
+    note: "proposal from the repo's GitHub data — confirm with the creator before publishing",
+  };
+}
+
 function readLog() { const p = path.join(ROOT, LOG); return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : []; }
 function addLog(entry) {
   const log = readLog(); log.push({ at: new Date().toISOString(), ...entry });
@@ -218,6 +248,7 @@ try {
       process.exitCode = n ? 2 : 0; }
   }
   else if (cmd === "patch") { const out = rest[0] && !rest[0].startsWith("--") ? rest[0] : undefined; const fl = arg("--files"); const d = patch(out, fl && fl.split(",")); if (!out) process.stdout.write(d); else console.log(`patch → ${out} (${d.length} bytes)`); }
+  else if (cmd === "author") console.log(JSON.stringify(author(), null, 1));
   else if (cmd === "write-manifest") writeManifest(arg("--from"));
   else if (cmd === "url") {
     const repo = arg("--repo") || ENGINE_REPO, title = arg("--title"), bf = arg("--body-file");
