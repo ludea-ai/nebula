@@ -30,7 +30,7 @@ if [ -n "$(git status --porcelain)" ]; then
 # Safety: local engine changes not yet upstream would be overwritten.
 UP=.claude/skills/_shared/upstream.cjs
 if [ -z "$FORCE" ] && [ -f "$UP" ] && [ -f .claude/skills/_shared/engine-manifest.json ]; then
-  if ! node "$UP" drift --upstream >/tmp/sync-drift.txt 2>&1; then
+  if ! node "$UP" drift --upstream --unreported >/tmp/sync-drift.txt 2>&1; then
     cat /tmp/sync-drift.txt
     echo "This repo changed the engine layer and Ludea doesn't have it yet — the sync would erase it."
     echo "Run the report-upstream skill first (or re-run with --force once it is reported)."; exit 1; fi

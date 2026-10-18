@@ -31,7 +31,8 @@ There is **no GitHub API** that lists repos generated from a template (a generat
 knows its template via the `template_repository` field, but not the reverse). So enumerate
 them one of these ways:
 - **Topic search (preferred):** `new-game` tags each game with a topic
-  `built-with-<template>`; list via `GET /search/repositories?q=topic:built-with-<template>`.
+  `built-with-ludea`; list via `GET /search/repositories?q=topic:built-with-ludea`. The Ludea
+  catalogue games are listed in `ludea-ai/ludea-ai.github.io/catalogue.json`.
 - **Account scan:** list your repos and keep those whose `template_repository.full_name`
   is your template.
 - **Manual registry:** a `GAMES.md` in the template.
