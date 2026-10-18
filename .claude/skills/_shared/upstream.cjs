@@ -166,7 +166,8 @@ function writeManifest(fromRef) {
   const same = prev && JSON.stringify(prev.files) === JSON.stringify(files);
   const today = new Date().toISOString().slice(0, 10);
   let version = prev && prev.version;
-  if (!same) { const n = prev && prev.version && prev.version.startsWith(today) ? +prev.version.split(".").pop() + 1 : 1; version = `${today}.${n}`; }
+  if (fromRef) version = `${tryS(`git log -1 --format=%cs ${fromRef}`) || "0000-00-00"}.0`; // bootstrapped: dated by that commit
+  else if (!same) { const n = prev && prev.version && prev.version.startsWith(today) ? +prev.version.split(".").pop() + 1 : 1; version = `${today}.${n}`; }
   const man = { version, from: same ? prev.from : (repoSlug() || "?") + "@" + (tryS(`git rev-parse --short ${fromRef || "HEAD"}`) || "?"), files };
   fs.writeFileSync(path.join(ROOT, MANIFEST), JSON.stringify(man, null, 1) + "\n");
   console.log(same ? `engine-manifest unchanged (${version})` : `engine-manifest → ${version} (${Object.keys(files).length} files)`);

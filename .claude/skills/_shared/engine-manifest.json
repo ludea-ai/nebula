@@ -1,6 +1,6 @@
 {
- "version": "2026-10-18.1",
- "from": "ludea-ai/nebula@a85bf97",
+ "version": "2026-10-18.2",
+ "from": "ludea-ai/nebula@75c6a2f",
  "files": {
   "engine.js": "f654e9c7d782867b3f70ecaa492cec512c264ceb",
   "engine.css": "0455b4e42d27deb6cbeef538868cea3870545edc",
@@ -35,7 +35,7 @@
   ".claude/skills/_shared/serve.sh": "136b278a594c4a90d2541c352e4a6b3903025118",
   ".claude/skills/_shared/svg-kit.cjs": "397687b300adefbf2af417110f95faf67add5c87",
   ".claude/skills/_shared/sync-engine.sh": "83733b27867dae89c013251d0b50cf41a18cd827",
-  ".claude/skills/_shared/upstream.cjs": "ba6c6e32d722db410821c040f2d9bcf60e5e04fb",
+  ".claude/skills/_shared/upstream.cjs": "86c539ae99148b5f108b184e35f560399c0e20ef",
   ".claude/skills/add-character/SKILL.md": "9b1c27a3289817a1a60ff90320b93f9f6e4d8b97",
   ".claude/skills/add-collision/SKILL.md": "5c7ca54cf8912861e53418d2ad57f4e6e35442d0",
   ".claude/skills/add-creature-variant/SKILL.md": "518b1796272601bcf13fe455d08842827adb7b92",
