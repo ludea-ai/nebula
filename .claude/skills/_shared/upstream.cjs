@@ -7,12 +7,13 @@
 //   - which engine it runs (manifest.version),
 //   - what IT changed in the engine layer since (drift = files whose hash differs),
 //   - the exact patch of that change (base blobs fetched from the public Ludea repos).
-// Used by the report-upstream / ludea-feedback / ludea-publish skills (games → Ludea) and by
+// Used by the report-upstream / idea / publish skills (games → Ludea) and by
 // sync-engine (refuses to overwrite unreported drift).
 //
 //   node .claude/skills/_shared/upstream.cjs context [--offline]  # JSON: repo, game, engine, drift
 //   node .claude/skills/_shared/upstream.cjs drift [--json] [--upstream] [--unreported]  # engine-layer files changed here
-//                                         # (--upstream: minus what Ludea already has; exit 2 = drift)
+//                                         # (--upstream: minus what Ludea already has, and files that
+//                                         #  are an older/newer Ludea version → "behind"; exit 2 = drift)
 //   node .claude/skills/_shared/upstream.cjs patch [out.diff] [--files a,b]  # unified diff of that drift
 //                                         (one issue = one coherent change: limit it to its files)
 //   node .claude/skills/_shared/upstream.cjs write-manifest [--from <ref>]
@@ -70,11 +71,16 @@ function drift(opts = {}) {
   const changed = [], added = [], removed = [];
   for (const f of Object.keys(now)) if (!(f in man.files)) added.push(f); else if (man.files[f] !== now[f]) changed.push(f);
   for (const f of Object.keys(man.files)) if (!(f in now)) removed.push(f);
-  let alreadyUpstream = [];
+  let alreadyUpstream = [], behind = [];
   if (opts.upstream) { // --upstream: drop what the Ludea repos already have (network)
     const up = upstreamBlobs(); const keep = (f) => !up.has(f + " " + now[f]);
     alreadyUpstream = [...changed, ...added].filter((f) => !keep(f));
     changed.splice(0, changed.length, ...changed.filter(keep)); added.splice(0, added.length, ...added.filter(keep));
+    // behind: content that IS a Ludea version of that file (copied from an older/newer engine), just
+    // not the current one — an engine update is available, not a local change to report.
+    const hist = (f) => upstreamHistory(f).has(now[f]);
+    behind = [...changed, ...added].filter(hist);
+    changed.splice(0, changed.length, ...changed.filter((f) => !hist(f))); added.splice(0, added.length, ...added.filter((f) => !hist(f)));
   }
   let reported = [];
   if (opts.unreported) { // --unreported: drop files whose CURRENT content was already reported (log --files)
@@ -83,7 +89,7 @@ function drift(opts = {}) {
     reported = [...changed, ...added, ...removed].filter((f) => !keep(f));
     [changed, added, removed].forEach((a) => a.splice(0, a.length, ...a.filter(keep)));
   }
-  return { manifest: { version: man.version, from: man.from }, changed, added, removed, alreadyUpstream, reported };
+  return { manifest: { version: man.version, from: man.from }, changed, added, removed, alreadyUpstream, behind, reported };
 }
 
 function gameInfo() {
@@ -108,8 +114,9 @@ function context() {
     head: tryS("git rev-parse HEAD"),
     game: gameInfo(),
     engine: d.manifest,
-    drift: { changed: d.changed, added: d.added, removed: d.removed, alreadyUpstream: d.alreadyUpstream, note: d.note },
-    driftUnreported: (() => { const u = drift({ unreported: true }); return [...u.changed, ...u.added, ...u.removed]; })(),
+    drift: { changed: d.changed, added: d.added, removed: d.removed, alreadyUpstream: d.alreadyUpstream, behind: d.behind, note: d.note },
+    // same upstream filter as `drift`: a file can't be both "already upstream" and "unreported"
+    driftUnreported: (() => { const u = drift({ upstream: !process.argv.includes("--offline"), unreported: true }); return [...u.changed, ...u.added, ...u.removed]; })(),
     inbox: { engine: ENGINE_REPO, catalogue: CATALOGUE_REPO },
     reported: readLog(),
   };
@@ -135,6 +142,18 @@ function upstreamBlobs() {
   for (const r of UPSTREAM_REPOS) tryS(`git -C ${cacheDir(r)} ls-tree -r main -- ${LAYER.join(" ")}`)
     .split("\n").filter(Boolean).forEach((l) => set.add(l.split("\t")[1] + " " + l.split(" ")[2].split("\t")[0]));
   return set;
+}
+// Every blob a file ever had on the upstream repos (any branch): from the commits' tree diffs, so
+// the blob-less cache doesn't download any content.
+const histCache = {};
+function upstreamHistory(f) {
+  if (!histCache[f]) {
+    const set = new Set();
+    for (const r of UPSTREAM_REPOS) tryS(`git -C ${cacheDir(r)} log --all --raw --no-abbrev --format= -- ${JSON.stringify(f)}`)
+      .split("\n").forEach((l) => { const m = l.match(/^:\S+ \S+ ([0-9a-f]{40}) ([0-9a-f]{40})/); if (m) { set.add(m[1]); set.add(m[2]); } });
+    histCache[f] = set;
+  }
+  return histCache[f];
 }
 function baseContent(sha) {
   for (const r of UPSTREAM_REPOS) {
@@ -245,6 +264,7 @@ try {
     else { const n = d.changed.length + d.added.length + d.removed.length;
       console.log(n ? `Engine layer differs from engine ${d.manifest.version}:` : `Engine layer identical to engine ${d.manifest.version}.`);
       d.changed.forEach((f) => console.log("  M " + f)); d.added.forEach((f) => console.log("  A " + f)); d.removed.forEach((f) => console.log("  D " + f));
+      if (d.behind && d.behind.length) console.log(`Behind Ludea (an engine update is available — run sync-engine / update; nothing to report):\n` + d.behind.map((f) => "  < " + f).join("\n"));
       process.exitCode = n ? 2 : 0; }
   }
   else if (cmd === "patch") { const out = rest[0] && !rest[0].startsWith("--") ? rest[0] : undefined; const fl = arg("--files"); const d = patch(out, fl && fl.split(",")); if (!out) process.stdout.write(d); else console.log(`patch → ${out} (${d.length} bytes)`); }
@@ -264,5 +284,5 @@ try {
       console.log(`logged ${kind}: ${k.join(":")}${fl ? ` (${Object.keys(files).length} file(s))` : ""}`);
     } else console.log(JSON.stringify(readLog(), null, 1));
   }
-  else { console.log(fs.readFileSync(__filename, "utf8").split("\n").slice(1, 20).map((l) => l.replace(/^\/\/ ?/, "")).join("\n")); process.exitCode = cmd ? 1 : 0; }
+  else { console.log(fs.readFileSync(__filename, "utf8").split("\n").slice(1).filter((l, i, a) => i < a.findIndex((x) => !x.startsWith("//"))).map((l) => l.replace(/^\/\/ ?/, "")).join("\n")); process.exitCode = cmd ? 1 : 0; }
 } catch (e) { console.error("upstream: " + (e.message || e)); process.exitCode = 1; }

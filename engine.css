@@ -439,6 +439,8 @@ html[data-screen="race"] { --edge: #000; }
 .help-text { display: flex; flex-direction: column; gap: 8px; }
 .help-row { text-wrap: pretty; line-height: 1.45; padding: 10px 14px; background: var(--panel2); border-radius: 16px; font-size: 0.98rem; }
 .help-row .ico { width: 1.7em; height: 1.7em; vertical-align: -0.5em; margin: 0 2px; }
+.help-legal { margin: 14px 0 0; text-align: center; font-size: 0.78rem; opacity: 0.7; }
+.help-legal a { color: inherit; }
 .help-row.lead { background: none; padding: 0 4px 2px; font-size: 1.12rem; text-align: center; }
 
 /* ===== Toast message ===== */

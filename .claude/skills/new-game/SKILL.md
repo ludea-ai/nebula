@@ -77,7 +77,7 @@ section by section:
 - `environment` (band + arena + trail loop + forest scatter) if used; else drop it
 - `objectives.levels` (gamification), `help`
 Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
-To appear in the Ludea catalogue (https://ludea.ai/), the game goes through **ludea-publish**
+To appear in the Ludea catalogue (https://ludea.ai/), the game goes through **/publish**
 (readiness + child-safety check, then a publication request reviewed by Ludea) — never edit the
 site from a game session.
 
@@ -177,8 +177,8 @@ short screen) before anything else in this step.
   or Settings → Pages → Source: **GitHub Actions**. If a first run already failed, re-run it
   (`gh run rerun <id>` or the Actions tab) once Pages is on.
 - **release-deploy** when the user wants it live (or hand back for review first).
-- Tell the creator, in one plain sentence each, about **/ludea-feedback** (ideas for the engine)
-  and **/ludea-publish** (ask to be in the Ludea catalogue).
+- Tell the creator, in one plain sentence each, about **/idea** (ideas for the engine)
+  and **/publish** (ask to be in the Ludea catalogue).
 
 ### Before you hand back — check every box (each was once skipped silently)
 ```bash
@@ -189,7 +189,7 @@ node .claude/skills/_shared/i18n-extract.cjs --to <other lang> --check   # exit 
 node .claude/skills/_shared/upstream.cjs drift --unreported              # exit 0 = nothing left to report
 ```
 Plus: tour green on Chromium 390x844 AND WebKit iPhone 13 (pageErrors [] / errors []), and the
-creator told about /ludea-feedback and /ludea-publish. A box you could not tick → say so plainly.
+creator told about /idea and /publish. A box you could not tick → say so plainly.
 
 ## Guard-rails
 - **Don't edit the engine for game content.** If the engine genuinely lacks a capability the
@@ -205,4 +205,4 @@ creator told about /ludea-feedback and /ludea-publish. A box you could not tick 
 ## Chaining
 **new-game** → asset-search/asset-add (themed assets) → add-* skills → test-debug →
 map-verify → capitalize-learnings → report-upstream → (Pages on) release-deploy → checklist above →
-(later) ludea-publish.
+(later) publish.
