@@ -1,0 +1,18 @@
+{
+  "_note": "Translations of the engine's OWN texts (English source strings used with L()/T() in engine.js). i18n-extract.cjs fills them into a game's game.i18n.js automatically, so creators never translate engine texts. Add an entry here whenever engine.js gets a new player-facing string.",
+  "fr": {
+    "Made with Ludea": "Fait avec Ludea",
+    "Legal notice": "Mentions légales",
+    "Publisher": "Éditeur",
+    "{name}, personal non-professional website.": "{name}, site personnel non professionnel.",
+    "The author of this game, personal non-professional website.": "L'auteur de ce jeu, site personnel non professionnel.",
+    "Contact:": "Contact :",
+    "Created by": "Créé par",
+    "Host": "Hébergeur",
+    "Netherlands": "Pays-Bas",
+    "Privacy": "Confidentialité",
+    "This game collects no personal data: no account, no cookie, no advertising, no audience measurement. Your game is saved only on this device.": "Ce jeu ne collecte aucune donnée personnelle : pas de compte, pas de cookie, pas de publicité, pas de mesure d'audience. La partie est enregistrée uniquement sur cet appareil.",
+    "Like any web host, GitHub processes technical data such as IP addresses to deliver the pages.": "Comme tout hébergeur, GitHub traite des données techniques, comme l'adresse IP, pour délivrer les pages.",
+    "This game is made with Ludea, a free game engine (MIT licence). Ludea is not the publisher of this game and has not reviewed it.": "Ce jeu est fait avec Ludea, un moteur de jeu libre (licence MIT). Ludea n'est pas l'éditeur de ce jeu et ne l'a pas vérifié."
+  }
+}

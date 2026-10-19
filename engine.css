@@ -441,6 +441,14 @@ html[data-screen="race"] { --edge: #000; }
 .help-row .ico { width: 1.7em; height: 1.7em; vertical-align: -0.5em; margin: 0 2px; }
 .help-legal { margin: 14px 0 0; text-align: center; font-size: 0.78rem; opacity: 0.7; }
 .help-legal a { color: inherit; }
+/* made with Ludea + legal notice: one small muted line under the home footer, never in the way */
+.home-legal { margin: 2px 0 0; text-align: center; font-size: 0.7rem; line-height: 1.6; color: var(--muted); opacity: 0.75; }
+.home-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; padding: 4px 2px; }
+.legal-text { text-align: left; font-size: 0.86rem; line-height: 1.45; }
+.legal-row { margin: 0 0 10px; }
+.legal-row b { display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.75; }
+.legal-row p { margin: 2px 0 0; }
+.legal-row a { color: inherit; }
 .help-row.lead { background: none; padding: 0 4px 2px; font-size: 1.12rem; text-align: center; }
 
 /* ===== Toast message ===== */

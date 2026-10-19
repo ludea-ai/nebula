@@ -20,8 +20,12 @@ Look the game up in the catalogue registry
   manifest.webmanifest assets tools`, rewritten in plain words: new things, changed things, fixes);
   new screenshots if something visible changed; updated catalogue description only if the game
   gained a mode. Nothing changed for players → say so and don't send.
-- A request already open for this game → don't open a second one: comment on it with the new
-  commit (the review restarts on that commit).
+- **A request already open for this game** (not yet published, or an update not yet accepted —
+  open issues on `ludea-ai/ludea-ai.github.io` whose marker has `repo=<owner/repo>`) → never open a
+  second one: post the new version as a **comment on that request**, with the SAME body as §3 (new
+  marker with the new `commit`, all sections incl. Credit and Consent), first line « New version for
+  review — replaces <previous commit> ». The catalogue agent reviews the new commit (and removes an
+  `on-hold` label); the owner can only accept the latest reviewed version.
 
 ## 0b. Can this session reach Ludea? (ask before anything that needs it)
 A session opened on a creator's game usually has GitHub access to **that repo only**: the MCP
@@ -81,6 +85,18 @@ Plus the game's usual QA (they must be green before submitting):
   confirm with ONE simple question (« Sur la fiche, on affiche : par Jean-Louis Rigau (@jlrigau).
   C'est bon ? ») — they may prefer a pseudonym. Never a child's full real name.
   Commit + deploy it with the rest.
+- **A child who made the game with them** (one plain question: « Un enfant a-t-il créé ce jeu avec
+  toi ? Veux-tu qu'il soit crédité ? »). If yes:
+  - the child is credited by a **first name or a nickname only** — never a surname, an age, a
+    school, a town or a photo — in `meta.author.coAuthors: [{ name: "Léa" }]`;
+  - optionally the credit sentence they like, in `meta.creditLine` (« Léa et son papa »; translated
+    in `game.i18n.js`); default = the names joined;
+  - **parental agreement** (required, one question): « Tu es son parent ou responsable légal, et
+    vous êtes d'accord tous les deux pour que ce prénom ou ce pseudo apparaisse sur le jeu et sur
+    ludea.ai ? Vous pourrez demander son retrait à tout moment. » No → no child credit (the game can
+    still be published under the adult's credit).
+  - Under 15 in France, the child's own agreement AND a parent's are both needed — that is why the
+    question asks for both.
 
 ## 2b. The creator's consent (required — ask it every time, in their language)
 One simple question (AskUserQuestion), word for word in substance:
@@ -112,10 +128,15 @@ Title: `[publish] <Game title> — <owner/repo>` (first publication) or
 - The original repo stays theirs; Ludea serves a reviewed copy and credits them on the card.
 ### What changed for players (update only)
 <plain-words list since the published version + screenshots if visible>
+### Credit
+- **Shown as:** <meta.creditLine, or the names> · **Child co-author(s):** <first names / nicknames, or none>
 ### Consent
 - [x] The creator (@<login>) allows Ludea to host, show and update a reviewed copy of this game on
   ludea.ai, credited to them, and may ask for its removal at any time. (Given on <date> in the
   creator's session.)
+- [x] (only with a child co-author) The submitter is the child's parent or legal guardian; the child
+  and the parent agree that the first name / nickname above is shown in the game and on ludea.ai,
+  and may ask for its removal at any time. (Given on <date> in the creator's session.)
 ### Readiness report
 <publish-check output (blockers: none), tour result, i18n --check, engine drift: none / reported in #…>
 ```

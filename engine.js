@@ -650,6 +650,12 @@ function applyStaticText() {
   setHTML("btn-continue", btnHTML(META.continueLabel || L("Continue"), META.continueIcon || "resume"));
   setHTML("btn-refresh", iconHTML("refresh") + " " + esc(stripIcons(T("refreshLabel", "Refresh (clear cache)"))));
   set("app-version", "build " + ASSET_VER);   // visible build tag (helps confirm the cache is fresh)
+  // made with Ludea + legal notice, a small line under the home footer (see legalLinksHTML)
+  const foot = document.querySelector("#screen-home .home-foot");
+  if (foot && !$("home-legal")) {
+    const p = document.createElement("p"); p.id = "home-legal"; p.className = "home-legal";
+    p.innerHTML = legalLinksHTML(); foot.insertAdjacentElement("afterend", p); wireLegalLinks(p);
+  }
   // Language switch (only when game.i18n.js provides another language): ONE toggle button pinned
   // to the home screen's top-left corner, a themed pill with the round flags and a knob behind the
   // active one. A tap slides the knob to the next language, saves it and reloads (texts are applied
@@ -4329,11 +4335,55 @@ function openGoals() {
 
 function openHelp() {
   const items = (G.help || []).map((h, i) => `<div class="help-row${i === 0 ? " lead" : ""}">${fmt(h, true)}</div>`).join("");
-  // optional small legal links at the very bottom (meta.legalLinks: [{ label, url }]) — out of the
-  // way of young players, but always reachable (publisher's legal notice / privacy policy)
-  const legal = (META.legalLinks || []).filter((l) => l && l.label && /^(https:\/\/|\/|\.\.?\/)/.test(l.url || ""))
-    .map((l) => `<a href="${l.url}">${L(l.label)}</a>`).join(" · ");
-  openModal(META.helpTitle || L("How to play"), `<div class="help-text">${items}</div>${legal ? `<p class="help-legal">${legal}</p>` : ""}`);
+  // the same small links as the bottom of the home screen: made with Ludea + legal notice
+  openModal(META.helpTitle || L("How to play"), `<div class="help-text">${items}</div><p class="help-legal">${legalLinksHTML()}</p>`);
+  wireLegalLinks($("modal-body"));
+}
+
+/* ===================== Credits & legal notice ===================== */
+// Every game shows, at the bottom of the home screen and of the help: "Made with Ludea" (a link to
+// the engine's site) and a legal notice. A game SERVED BY ITS PUBLISHER's own legal pages lists them
+// in meta.legalLinks [{ label, url }] (Ludea's catalogue copies: legal notice, privacy, contact).
+// Otherwise the engine builds the notice from meta.author: a game made with Ludea and published by
+// its creator on their own site is a personal, non-professional site — publisher = the creator's
+// chosen name or pseudonym, contact = their GitHub profile, host = GitHub Pages; Ludea is not its
+// publisher. Links open in a new tab so the game is never lost.
+const ENGINE_SITE = "https://ludea.ai/";
+const safeUrl = (u) => /^(https:\/\/|\/|\.\.?\/)/.test(String(u || ""));
+function legalLinksHTML() {
+  const ext = (META.legalLinks || []).filter((l) => l && l.label && safeUrl(l.url));
+  const made = `<a href="${ENGINE_SITE}" target="_blank" rel="noopener">${esc(L("Made with Ludea"))}</a>`;
+  const legal = ext.length ? ext.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(L(l.label))}</a>`).join(" · ")
+    : `<a href="#" data-legal="1">${esc(L("Legal notice"))}</a>`;
+  return `${made} · ${legal}`;
+}
+function wireLegalLinks(root) {
+  if (root) root.querySelectorAll("[data-legal]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openLegal(); }));
+}
+// Who made the game, for the notice: meta.creditLine (a translatable sentence the creator chose,
+// e.g. "Lea and her dad") or the author's name + co-authors' first names / nicknames.
+function creditText() {
+  const a = META.author || {};
+  if (META.creditLine) return META.creditLine;
+  return [a.name].concat((a.coAuthors || []).map((c) => c && c.name)).filter(Boolean).join(" & ");
+}
+function openLegal() {
+  const a = META.author || {};
+  const gh = /^[A-Za-z0-9-]{1,39}$/.test(a.github || "") ? a.github : "";
+  const who = creditText();
+  const row = (h, body) => `<div class="legal-row"><b>${esc(h)}</b><p>${body}</p></div>`;
+  const html = [
+    row(L("Publisher"), esc(a.name ? T("legalPublisher", "{name}, personal non-professional website.", { name: a.name }) : L("The author of this game, personal non-professional website.")) +
+      (gh ? `<br>${esc(L("Contact:"))} <a href="https://github.com/${gh}" target="_blank" rel="noopener">github.com/${gh}</a>` : "")),
+    who && who !== a.name ? row(L("Created by"), esc(who)) : "",
+    row(L("Host"), "GitHub B.V. (GitHub Pages), Vijzelstraat 68-72, 1017 HL Amsterdam, " + esc(L("Netherlands")) +
+      ` — <a href="https://support.github.com/" target="_blank" rel="noopener">support.github.com</a>`),
+    row(L("Privacy"), esc(L("This game collects no personal data: no account, no cookie, no advertising, no audience measurement. Your game is saved only on this device.")) +
+      " " + esc(L("Like any web host, GitHub processes technical data such as IP addresses to deliver the pages."))),
+    row(L("Made with Ludea"), esc(L("This game is made with Ludea, a free game engine (MIT licence). Ludea is not the publisher of this game and has not reviewed it.")) +
+      ` <a href="${ENGINE_SITE}" target="_blank" rel="noopener">ludea.ai</a>`),
+  ].join("");
+  openModal(L("Legal notice"), `<div class="legal-text">${html}</div>`);
 }
 
 /* ===================== Boot ===================== */

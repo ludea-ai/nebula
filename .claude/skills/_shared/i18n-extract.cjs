@@ -6,6 +6,7 @@
  *   node .claude/skills/_shared/i18n-extract.cjs --to en --check  # exit 1 and list untranslated / stale keys
  *   node .claude/skills/_shared/i18n-extract.cjs --to en --prune  # also drop keys no longer in the game
  *   node .claude/skills/_shared/i18n-extract.cjs --to fr           # in a French game: engine fallbacks only
+ * The engine's own texts are filled in automatically from _shared/engine-i18n.json.
  *
  * Run from the game's root. Keys = every player-facing string of game.config.js (same skip rules
  * as the engine's runtime walk) + the engine's own English fallbacks (L("...") / T(key, "...")),
@@ -76,8 +77,12 @@ if (check) {
   process.exit(missing.length ? 1 : 0);
 }
 
+// The engine's own texts come translated with the engine (_shared/engine-i18n.json): filled in
+// automatically, never left for the creator to translate.
+let ENGINE_I18N = {};
+try { ENGINE_I18N = JSON.parse(fs.readFileSync(path.join(__dirname, "engine-i18n.json"), "utf8"))[to] || {}; } catch (e) {}
 const out = {};
-for (const k of keys.keys()) out[k] = dict[k] != null ? dict[k] : "";
+for (const k of keys.keys()) out[k] = dict[k] ? dict[k] : (ENGINE_I18N[k] || (dict[k] != null ? dict[k] : ""));
 if (!prune) for (const k of stale) out[k] = dict[k];
 all[to] = out;
 const langs = Object.keys(all).sort();
@@ -89,4 +94,5 @@ for (const l of langs) {
   txt += `window.GAME_I18N.${l} = {\n` + Object.keys(all[l]).map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(all[l][k])},`).join("\n") + `\n};\n`;
 }
 fs.writeFileSync(file, txt);
-console.log(`game.i18n.js: ${to} ${Object.keys(out).length} keys, ${missing.length} to translate${stale.length ? `, ${stale.length} stale ${prune ? "dropped" : "kept"}` : ""}`);
+const auto = missing.filter((k) => out[k]).length;
+console.log(`game.i18n.js: ${to} ${Object.keys(out).length} keys, ${missing.length - auto} to translate${auto ? `, ${auto} engine texts filled in` : ""}${stale.length ? `, ${stale.length} stale ${prune ? "dropped" : "kept"}` : ""}`);

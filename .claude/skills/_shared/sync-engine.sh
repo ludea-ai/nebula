@@ -29,14 +29,6 @@ ROOT="${SYNC_ENGINE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 if [ -n "$(git status --porcelain)" ]; then
   echo "Working tree not clean — commit or stash first, then re-run."; exit 1; fi
 
-# Safety: local engine changes not yet upstream would be overwritten.
-UP=.claude/skills/_shared/upstream.cjs
-if [ -z "$FORCE" ] && [ -f "$UP" ] && [ -f .claude/skills/_shared/engine-manifest.json ]; then
-  if ! node "$UP" drift --upstream --unreported >/tmp/sync-drift.txt 2>&1; then
-    cat /tmp/sync-drift.txt
-    echo "This repo changed the engine layer and Ludea doesn't have it yet — the sync would erase it."
-    echo "Run the report-upstream skill first (or re-run with --force once it is reported)."; exit 1; fi
-fi
 
 # Resolve SRC to a remote (reuse an existing remote name, else add a temp one).
 TMP=""
@@ -61,6 +53,18 @@ if [ -z "${SYNC_ENGINE_REEXEC:-}" ] && git cat-file -e "$REMOTE/$REF:$SELF" 2>/d
     SYNC_ENGINE_REEXEC=1 SYNC_ENGINE_ROOT="$ROOT" exec bash "$NEW" "${ORIG_ARGS[@]}"
   fi
   rm -f "$NEW"
+fi
+
+# Safety: local engine changes not yet upstream would be overwritten. The check runs the SOURCE's
+# upstream.cjs against this repo — never a script of the repo being updated (it may be a copy of a
+# game made by someone else: its tooling is not trusted).
+if [ -z "$FORCE" ] && [ -f .claude/skills/_shared/engine-manifest.json ] && git cat-file -e "$REMOTE/$REF:.claude/skills/_shared/upstream.cjs" 2>/dev/null; then
+  UPT="$(mktemp --suffix=.cjs)"; git show "$REMOTE/$REF:.claude/skills/_shared/upstream.cjs" >"$UPT"
+  if ! UPSTREAM_ROOT="$ROOT" node "$UPT" drift --upstream --unreported >/tmp/sync-drift.txt 2>&1; then
+    rm -f "$UPT"; cat /tmp/sync-drift.txt
+    echo "This repo changed the engine layer and Ludea doesn't have it yet — the sync would erase it."
+    echo "Run the report-upstream skill first (or re-run with --force once it is reported)."; exit 1; fi
+  rm -f "$UPT"
 fi
 
 PATHS=(engine.js engine.css ENGINE.md .claude/skills)

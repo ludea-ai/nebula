@@ -77,6 +77,13 @@ section by section:
 - `environment` (band + arena + trail loop + forest scatter) if used; else drop it
 - `objectives.levels` (gamification), `help`
 Use a fresh `meta.saveKey` so it doesn't collide with other games' saves.
+- `meta.author`: who publishes the game — it fills the **legal notice** the engine shows on the home
+  screen (« Mentions légales »: publisher = this name or pseudonym, personal non-professional site,
+  contact = their GitHub profile). Fill it from `node .claude/skills/_shared/upstream.cjs author` and
+  confirm in one plain question (« Dans les mentions légales du jeu, on indique : Jean-Louis Rigau
+  (@jlrigau). C'est bon, ou tu préfères un pseudo ? »). A child co-author is added only by
+  **/publish** (first name / nickname + parental agreement). Do NOT set `meta.legalLinks` — it is for
+  games served by a publisher with its own legal pages (Ludea's catalogue copies).
 To appear in the Ludea catalogue (https://ludea.ai/), the game goes through **/publish**
 (readiness + child-safety check, then a publication request reviewed by Ludea) — never edit the
 site from a game session.

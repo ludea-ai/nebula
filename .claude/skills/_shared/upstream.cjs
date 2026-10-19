@@ -28,7 +28,7 @@
 "use strict";
 const fs = require("fs"), path = require("path"), cp = require("child_process"), os = require("os");
 
-const ROOT = path.resolve(__dirname, "../../..");
+const ROOT = process.env.UPSTREAM_ROOT ? path.resolve(process.env.UPSTREAM_ROOT) : path.resolve(__dirname, "../../.."); // UPSTREAM_ROOT: run a TRUSTED copy against another repo (sync-engine.sh)
 const MANIFEST = ".claude/skills/_shared/engine-manifest.json";
 const LOG = ".claude/upstream-log.json";               // game-side, NOT engine layer (never synced)
 const LAYER = ["engine.js", "engine.css", "ENGINE.md", ".claude/skills"];

@@ -3,7 +3,7 @@
 // Runs on THIS repo, or on any game folder (the catalogue reviewer points it at a clone of a
 // submitted game, using its OWN trusted copy of this script — never the submitted one).
 //
-//   node .claude/skills/_shared/publish-check.cjs [gameDir] [--json] [--no-run] [--shots DIR]
+//   node .claude/skills/_shared/publish-check.cjs [gameDir] [--json] [--no-run] [--shots DIR] [--texts FILE]
 //
 // Static part: catalogue fields (title, tagline, audience age, language + translation, app
 // icons, README, credits), forbidden/risky code in the GAME files (external links, network
@@ -15,25 +15,70 @@
 // request to ANOTHER origin (must be none) + page errors; screenshots home + world.
 // Exit 0 = ready, 1 = blocking problems, 2 = warnings only.
 "use strict";
-const fs = require("fs"), path = require("path"), cp = require("child_process"), vm = require("vm"), net = require("net");
+const fs = require("fs"), path = require("path"), cp = require("child_process"), net = require("net");
 
 const argv = process.argv.slice(2);
 const flag = (k) => argv.includes(k);
 const opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
-const DIR = path.resolve(argv.find((a, i) => !a.startsWith("--") && argv[i - 1] !== "--shots") || path.resolve(__dirname, "../../.."));
+const DIR = path.resolve(argv.find((a, i) => !a.startsWith("--") && argv[i - 1] !== "--shots" && argv[i - 1] !== "--texts") || path.resolve(__dirname, "../../.."));
 const rd = (f) => { try { return fs.readFileSync(path.join(DIR, f), "utf8"); } catch (e) { return null; } };
 const exists = (f) => fs.existsSync(path.join(DIR, f));
 
 const blockers = [], warnings = [], info = {};
 const B = (m) => blockers.push(m), W = (m) => warnings.push(m);
 
+// The game's files are UNTRUSTED (a submitted game may be hostile): its code is never run by Node
+// (node:vm is not a security boundary — a config can escape it and reach the reviewer's credentials).
+// It is evaluated only inside headless Chromium, with every network request blocked, and only the
+// resulting data (JSON) comes back.
+function loadPlaywright() {
+  for (const c of ["playwright", "/opt/node22/lib/node_modules/playwright"]) { try { return require(c); } catch (e) {} }
+  return null;
+}
+async function evalConfigInBrowser(src) {
+  const pw = loadPlaywright();
+  if (!pw) throw new Error("Playwright not found — the config is only evaluated inside a browser");
+  const browser = await pw.chromium.launch();
+  try {
+    const ctx = await browser.newContext({ javaScriptEnabled: true });
+    await ctx.route("**/*", (r) => r.abort());
+    const page = await ctx.newPage();
+    await page.addScriptTag({ content: src });   // runs inside the sandboxed page only
+    return await page.evaluate(() => JSON.parse(JSON.stringify(window.GAME || null)));
+  } finally { await browser.close(); }
+}
+
 // ---------- 1. Catalogue fields
 let G = null;
+async function main() {
 const cfg = rd("game.config.js");
 if (!cfg) B("game.config.js missing — not a Ludea engine game");
 else {
-  try { const sb = { window: {} }; vm.runInNewContext(cfg, sb, { timeout: 2000 }); G = sb.window.GAME || sb.GAME; }
+  try { G = await evalConfigInBrowser(cfg); }
   catch (e) { B("game.config.js does not evaluate: " + e.message); }
+}
+// --texts FILE: every player-facing text (config + translations), for the child-safety reviewer —
+// produced here so the reviewer never has to run the submitted game's code with Node.
+if (opt("--texts") && G) {
+  const out = new Set();
+  (function walk(o, k) {
+    if (typeof o === "string") { if (/\p{L}{2}/u.test(o) && !/^(#|rgba?\(|https?:|[\w./-]+\.(webp|png|jpe?g|svg|js|css)$)/.test(o) && !/^(id|key|path|src|sheet|img|icon|color|saveKey|stat|need|type|kind|mode|lang)$/.test(k || "")) out.add(o); return; }
+    if (o && typeof o === "object") for (const [kk, v] of Object.entries(o)) walk(v, Array.isArray(o) ? k : kk);
+  })(G, "");
+  const i18nSrc = rd("game.i18n.js");
+  if (i18nSrc) {
+    try {
+      const pw = loadPlaywright(), browser = await pw.chromium.launch();
+      const ctx = await browser.newContext(); await ctx.route("**/*", (r) => r.abort());
+      const page = await ctx.newPage();
+      await page.addScriptTag({ content: i18nSrc });
+      const dicts = await page.evaluate(() => JSON.parse(JSON.stringify(window.GAME_I18N || {})));
+      await browser.close();
+      for (const d of Object.values(dicts)) for (const v of Object.values(d || {})) if (typeof v === "string" && v) out.add(v);
+    } catch (e) { W("game.i18n.js could not be read for --texts: " + e.message); }
+  }
+  fs.writeFileSync(opt("--texts"), [...out].join("\n") + "\n");
+  info.texts = out.size;
 }
 const M = (G && G.meta) || {};
 info.title = M.title; info.tagline = M.tagline; info.description = M.description; info.lang = M.lang; info.audience = M.audience;
@@ -137,11 +182,25 @@ const FIRST_NAMES = ("Emma Léa Louise Alice Chloé Inès Jeanne Lina Mila Anna 
   "Olivia Amelia Isla Ava Sophia Grace Lily Freya Emily Ivy Ella Isabella Poppy Evie Harper Sienna Willow Daisy Matilda " +
   "Oliver George Noah Arthur Muhammad Leo Harry Oscar Archie Henry Theodore Freddie Jack Charlie Thomas Jacob Alfie Finley James William").split(" ");
 const namesFound = [...new Set(FIRST_NAMES.filter((n) => new RegExp(`(^|[^\\p{L}])${n}([^\\p{L}]|$)`, "u").test(words)))]
-  .filter((n) => !(info.authorName || "").includes(n));
+  .filter((n) => ![info.authorName, M.creditLine, ...(((M.author || {}).coAuthors) || []).map((c) => c && c.name)].join(" ").includes(n));
+// a child co-author is credited by a first name or a nickname only (never a surname, age, school, town)
+for (const c of (((M.author || {}).coAuthors) || [])) {
+  const nm = String((c && c.name) || "").trim();
+  if (!nm) continue;
+  if (/\s\p{Lu}/u.test(nm) || /\d/.test(nm) || nm.split(/\s+/).length > 2) B(`co-author "${nm}": a first name or a nickname only (no surname, age, school or town)`);
+}
 info.firstNames = namesFound;
 if (namesFound.length) W(`first names in the game's texts: ${namesFound.slice(0, 12).join(", ")} — make sure none is a real child's name (a pet name is fine)`);
 // Copied content: well-known characters / brands (not ours to use; parents and rights holders notice).
-const BRANDS = /pok[ée]mon|pikachu|disney|pixar|minecraft|fortnite|roblox|super mario|nintendo|zelda|harry potter|poudlard|hogwarts|spider-?man|marvel|avengers|batman|reine des neiges|peppa pig|pat'? ?patrouille|paw patrol|barbie|hello kitty|bluey|\blego\b|playmobil|sonic the hedgehog|star wars|\bjedi\b|pac-?man|tetris|angry birds|schtroumpf|smurf|ast[ée]rix|tintin|winnie|mickey|minnie|\bstitch\b|\bsimba\b|\bshrek\b|minions|totoro|naruto|dragon ball|one piece|bob l'[ée]ponge|spongebob|garfield|snoopy|scooby/gi;
+const BRANDS = new RegExp([
+  "pok[ée]mon|pikachu|disney|pixar|minecraft|fortnite|roblox|super mario|nintendo",
+  "zelda|harry potter|poudlard|hogwarts|spider-?man|marvel|avengers|batman",
+  "reine des neiges|peppa pig|pat'? ?patrouille|paw patrol|barbie|hello kitty",
+  "bluey|\\blego\\b|playmobil|sonic the hedgehog|star wars|\\bjedi\\b|pac-?man",
+  "tetris|angry birds|schtroumpf|smurf|ast[ée]rix|tintin|winnie|mickey|minnie",
+  "\\bstitch\\b|\\bsimba\\b|\\bshrek\\b|minions|totoro|naruto|dragon ball|one piece",
+  "bob l'[ée]ponge|spongebob|garfield|snoopy|scooby",
+].join("|"), "gi");
 const brands = [...new Set((words.match(BRANDS) || []).map((b) => b.toLowerCase()))];
 info.brands = brands;
 if (brands.length) B(`well-known characters / brands in the texts: ${brands.join(", ")} — Ludea games use their own characters (remove them, or rename)`);
@@ -198,23 +257,24 @@ if (badLines.length) B(`licence not accepted (ND / NC / all rights reserved) in 
 if (unlicensed.length) B(`third-party asset without an accepted licence (CC0, public domain, CC BY, CC BY-SA) in assets/CREDITS.md: ${unlicensed.slice(0, 4).join(" | ")}`);
 
 // ---------- 3. Engine layer: changed but not reported upstream?
-const up = path.join(DIR, ".claude/skills/_shared/upstream.cjs");
 if (fs.existsSync(path.join(DIR, ".claude/skills/_shared/engine-manifest.json"))) {
   try {
-    const own = path.join(__dirname, "upstream.cjs"); // trusted copy, run against DIR via cwd-less ROOT? → run the target's only if it is ours
-    const out = cp.execSync(`node ${JSON.stringify(fs.existsSync(up) && DIR === path.resolve(__dirname, "../../..") ? up : own)} drift --json --upstream --unreported`, { cwd: DIR, encoding: "utf8" });
+    // OUR copy of upstream.cjs, pointed at DIR (never the submitted repo's own scripts)
+    const own = path.join(__dirname, "upstream.cjs");
+    // drift exits non-zero when something changed: read its JSON either way
+    const out = cp.spawnSync("node", [own, "drift", "--json", "--upstream", "--unreported"], { cwd: DIR, encoding: "utf8", env: { ...process.env, UPSTREAM_ROOT: DIR } }).stdout;
     const d = JSON.parse(out); const n = d.changed.length + d.added.length + d.removed.length;
     info.engine = d.manifest && d.manifest.version;
     if ((d.behind || []).length) info.engineBehind = d.behind.length; // only an older/newer Ludea copy: fine to submit (update first if you like)
-    if (n && DIR === path.resolve(__dirname, "../../..")) W(`engine layer changed in ${n} file(s) not yet reported — run report-upstream so Ludea gets it (and the next sync doesn't overwrite it)`);
-  } catch (e) { /* drift exit 2 is fine */ }
+    info.engineDrift = n;
+    if (n) W(`engine layer changed in ${n} file(s) not yet reported — ${DIR === path.resolve(__dirname, "../../..") ? "run report-upstream so Ludea gets it (and the next sync doesn't overwrite it)" : "the reviewer must read these changes by hand"}`);
+  } catch (e) { W("engine drift could not be computed: " + e.message); }
 }
 
 // ---------- 4. Runtime: no request leaves the game's origin, no page error
 async function runtime() {
   if (flag("--no-run")) return;
-  let pw = null;
-  for (const c of ["playwright", "/opt/node22/lib/node_modules/playwright"]) { try { pw = require(c); break; } catch (e) {} }
+  const pw = loadPlaywright();
   if (!pw) { W("Playwright not found — runtime check skipped"); return; }
   const port = await new Promise((r) => { const s = net.createServer().listen(0, () => { const p = s.address().port; s.close(() => r(p)); }); });
   const srv = cp.spawn("python3", ["-m", "http.server", String(port), "--bind", "127.0.0.1"], { cwd: DIR, stdio: "ignore" });
@@ -242,7 +302,10 @@ async function runtime() {
   if (errors.length) B(`${errors.length} page error(s): ` + errors.slice(0, 3).join(" | "));
 }
 
-runtime().then(() => {
+await runtime();
+}
+
+main().then(() => {
   const res = { dir: DIR, ready: !blockers.length, blockers, warnings, info };
   if (flag("--json")) console.log(JSON.stringify(res, null, 1));
   else {

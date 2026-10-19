@@ -79,8 +79,16 @@ title, titleIcon, logo ("assets/img/logo.png" — big home-screen image), shortN
 description,                          // optional: 1–2 sentences for the Ludea catalogue card (source language; translated in game.i18n.js like any text); not shown in-game
 legacySave: { key: "old-key" | ["k1","k2"], migrate: (old) => stateLike },   // see below
 audience: { minAge, notes },          // used by the asset skills' content policy
-author: { name, github, url, contributors: [{ login, name }] }, // credit in the Ludea catalogue (publish, filled from `upstream.cjs author`); not shown in-game
-legalLinks: [{ label, url }],      // optional: small links at the bottom of the help screen (legal notice, privacy) — https or same-site URLs only
+author: { name, github, url, contributors: [{ login, name }], coAuthors: [{ name }] },
+                                      // who made and publishes the game: the catalogue credit AND the in-game legal notice
+                                      // (name = a name or pseudonym; github = login, shown as the contact). coAuthors = e.g. the
+                                      // child who made the game with their parent: a FIRST NAME OR NICKNAME only (never a surname,
+                                      // an age, a school or a town) and only with the parent's agreement (/publish asks)
+creditLine,                           // optional, translatable: how the makers are credited, e.g. "Léa et son papa" (default:
+                                      // author.name + coAuthors names)
+legalLinks: [{ label, url }],         // ONLY for a game served by a publisher that has its own legal pages (Ludea's catalogue
+                                      // copies: legal notice, privacy, contact) — https or same-site URLs. Without it the engine
+                                      // shows its generated notice (below).
 theme: { home, play, closeup },        // iOS theme-color per screen
 showCoins,                             // false → hide the coins HUD (no economy)
 showDay, showCreatureCount,            // false → hide the day / creature-count HUD chips (minimal HUD)
@@ -91,6 +99,21 @@ ageUnit, and, nightMessage, restBlockedHint, neglectMessage, morningMessage,
 notEnough, idleHint, placeHint, placeHere, cancel, boughtDecorMessage, placedMessage, blocksPath,
 refundMessage, noOnBuilding, noInHome, nameLabel, confirm, nameTaken, closeLabel
 ```
+
+**Made with Ludea + legal notice (every game, automatic).** A small line at the bottom of the home
+screen, repeated at the bottom of the help: « Made with Ludea » (a link to https://ludea.ai/, opened
+in a new tab so the game is never lost — never shown during play) and the legal notice.
+- With `meta.legalLinks` (a publisher's own pages, e.g. Ludea's catalogue copies): those links.
+- Without (a creator's game on their own site — the normal case): « Legal notice » opens a notice
+  generated from `meta.author`: publisher = the author's name or pseudonym, « personal
+  non-professional website » (French law lets a private individual stay anonymous towards the public
+  when the host is named and knows them), contact = their GitHub profile; « created by » =
+  `creditLine` / co-authors; host = GitHub Pages; privacy = the engine collects nothing (no account,
+  cookie, ads or audience measurement; saves stay on the device; GitHub logs IPs like any host);
+  « Ludea is not the publisher of this game and has not reviewed it ». A game that collects anything
+  (it should not, especially for children) must write its own pages and list them in `legalLinks`.
+- The engine's own texts are translated by `_shared/engine-i18n.json`, filled into `game.i18n.js` by
+  `i18n-extract.cjs` automatically.
 Strings with `{name}`, `{day}`, `{names}`, `{item}` are interpolated by the engine, and
 `{i:key}` tokens become icons (see Icons). User-typed names are HTML-escaped.
 

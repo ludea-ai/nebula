@@ -33,9 +33,9 @@ window.GAME = {
     tagline: "Look after the little glowing critters!",
     description: "Care for glowing alien critters on a space station: feed them, raise their babies, ride them through the asteroid belt and deliver parcels across the Star Ring.",
     saveKey: "nebula-nursery",
-    legalLinks: [{ label: "Legal notice", url: "https://ludea.ai/legal/" }, { label: "Privacy", url: "https://ludea.ai/privacy/" }],
+    legalLinks: [{ label: "Legal notice", url: "https://ludea.ai/legal/" }, { label: "Privacy", url: "https://ludea.ai/privacy/" }, { label: "Contact", url: "https://ludea.ai/contact/" }],
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v63",
+    assetVersion: "v64",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: true,
     coinIcon: "shard",                // the currency: star shards

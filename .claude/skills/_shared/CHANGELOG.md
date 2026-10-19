@@ -8,6 +8,20 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
+## 2026-10-19.4
+### New — you can switch it on
+- **Credit the child who made the game with you** (a first name or a nickname only, with your agreement
+  and theirs) — `meta.author.coAuthors: [{ name }]`, `meta.creditLine` — asked by /publish.
+### Better — automatic
+- **« Made with Ludea » and a legal notice at the bottom of the home screen** (and of the help), on
+  every game: the notice is written for you from `meta.author` (you are the publisher of your own
+  site; host GitHub; nothing collected); Ludea's catalogue copies show Ludea's pages, with Contact.
+- **Safer reviews**: a game sent for review is never run outside a locked-down browser; updates of a
+  game never run the game's own scripts; alarms on suspicious engine changes.
+- **A new version on a request still waiting** is reviewed again — only the latest reviewed version
+  can be published.
+- The engine's own texts come translated: `i18n-extract` fills them in for you.
+
 ## 2026-10-19.3
 ### New — you can switch it on
 - **A nice card when someone shares your game's link** (its picture, its name and its one-line
