@@ -8,6 +8,12 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
+## 2026-10-19.5
+### Better — automatic
+- **Safer tools**: the tools that read your game's settings (translations, link preview, systems map,
+  game info) now read them inside a locked-down browser, like the publication check — a file can never
+  act on the computer running them.
+
 ## 2026-10-19.4
 ### New — you can switch it on
 - **Credit the child who made the game with you** (a first name or a nickname only, with your agreement

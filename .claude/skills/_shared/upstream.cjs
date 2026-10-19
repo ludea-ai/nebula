@@ -96,9 +96,8 @@ function gameInfo() {
   const p = path.join(ROOT, "game.config.js");
   if (!fs.existsSync(p)) return null;
   try {
-    const sandbox = { window: {} }; const vm = require("vm");
-    vm.runInNewContext(fs.readFileSync(p, "utf8"), sandbox, { timeout: 2000 });
-    const G = sandbox.window.GAME || sandbox.GAME || {}; const M = G.meta || {};
+    // read in a sandboxed browser, never with node:vm (config-json.cjs)
+    const G = require("./config-json.cjs").readGlobals([[p, "GAME"]]).GAME || {}; const M = G.meta || {};
     return { title: M.title, tagline: M.tagline || M.subtitle, audience: M.audience, lang: M.lang, version: G.assetVersion || M.assetVersion };
   } catch (e) { return { error: String(e.message || e) }; }
 }

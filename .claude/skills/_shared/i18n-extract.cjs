@@ -15,19 +15,17 @@
  * a value equal to the key = intentionally identical (names, "OK"...).
  * NEVER translate identifiers: they are excluded here (lowercase ids, paths, colours, *Id/*Sheet keys).
  */
-const fs = require("fs"), path = require("path"), vm = require("vm");
+const fs = require("fs"), path = require("path");
 const args = process.argv.slice(2);
 const opt = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
 const to = opt("--to"), check = args.includes("--check"), prune = args.includes("--prune");
 if (!to) { console.error("usage: i18n-extract.cjs --to <lang> [--check] [--prune]"); process.exit(2); }
 const root = process.cwd();
 
-function load(file, extra) {
-  const ctx = { window: {}, navigator: { language: "en" }, console, ...extra };
-  vm.createContext(ctx); vm.runInContext(fs.readFileSync(file, "utf8"), ctx, { filename: file });
-  return ctx.window;
-}
-const G = load(path.join(root, "game.config.js")).GAME;
+// game files are read in a sandboxed browser, never with node:vm (config-json.cjs)
+const { readGlobals } = require("./config-json.cjs");
+function load(file, name) { return readGlobals([[file, name]])[name]; }
+const G = load(path.join(root, "game.config.js"), "GAME");
 const SRC = (G.meta && G.meta.lang) || "en";
 // --to <source language>: only the engine's English fallbacks (a French game must not show "Shop").
 const ONLY_ENGINE = to === SRC;
@@ -65,7 +63,7 @@ if (to !== "en") {
 // Existing dictionary.
 const file = path.join(root, "game.i18n.js");
 let all = {};
-if (fs.existsSync(file)) all = load(file).GAME_I18N || {};
+if (fs.existsSync(file)) all = load(file, "GAME_I18N") || {};
 const dict = all[to] || {};
 const missing = [...keys.keys()].filter((k) => !dict[k]);
 const stale = Object.keys(dict).filter((k) => !keys.has(k));

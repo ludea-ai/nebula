@@ -8,11 +8,10 @@
  *   node .claude/skills/_shared/game-systems.cjs --json
  *   node .claude/skills/_shared/game-systems.cjs --uses race,chase   # exit 0 if it uses any, else 1
  */
-const fs = require("node:fs"), path = require("node:path"), vm = require("node:vm");
+const fs = require("node:fs"), path = require("node:path");
 const ROOT = process.cwd(); // run from the game repo root
-const win = {};
-vm.runInNewContext(fs.readFileSync(path.join(ROOT, "game.config.js"), "utf8"), { window: win, console });
-const G = win.GAME || {};
+// the config is read in a sandboxed browser, never with node:vm (config-json.cjs)
+const G = require("./config-json.cjs").readGlobals([[path.join(ROOT, "game.config.js"), "GAME"]]).GAME || {};
 const C = G.creature || {};
 const on = (v) => Array.isArray(v) ? v.length > 0 : !!v && (typeof v !== "object" || v.enabled !== false);
 
