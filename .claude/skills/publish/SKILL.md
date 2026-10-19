@@ -23,6 +23,19 @@ Look the game up in the catalogue registry
 - A request already open for this game → don't open a second one: comment on it with the new
   commit (the review restarts on that commit).
 
+## 0b. Can this session reach Ludea? (ask before anything that needs it)
+A session opened on a creator's game usually has GitHub access to **that repo only**: the MCP
+tools answer "repository not configured for this session" for `ludea-ai/*`, and `gh` is often not
+logged in. That is the normal case, not an error. Before the first step that needs Ludea's repos
+(the catalogue lookup can use the public raw URL; the request itself and its de-duplication need
+access), ask ONE plain question (AskUserQuestion), in their language:
+« Je peux envoyer la demande moi-même (il me faut l'accès au dépôt Ludea) ou te donner un lien
+déjà rempli. Que préfères-tu ? La demande sera publique. » (EN: "I can send the request myself
+— I need access to the Ludea repository — or give you a ready-filled link. Which do you prefer?
+The request will be public.")
+- **Myself** → `add_repo` (`ludea-ai/ludea-ai.github.io`) if the tool exists, then the MCP route.
+- **Link** → `upstream.cjs url …` (§3); de-duplicate by reading the public issues page instead.
+
 ## 1. Readiness check (silent)
 ```bash
 node .claude/skills/_shared/publish-check.cjs --shots /tmp/publish-shots   # exit 0 ready · 1 blocking · 2 warnings
@@ -34,12 +47,23 @@ Plus the game's usual QA (they must be green before submitting):
 
 ## 2. Fix what is missing — with the creator, in plain words
 - Blocking items you can fix yourself (missing tagline, untranslated texts, icon, credits) →
-  fix, re-run, commit + deploy (release-deploy). Ask only for what only they know:
-  **the age range** and **a one-sentence description** if missing (AskUserQuestion, simple).
+  fix, re-run, commit + deploy (release-deploy). **Always bump the build number**
+  (`bump-version.mjs`), even for a fix nobody sees (e.g. adding `meta.author`): the submitted
+  commit then matches a build number the reviewer can check at the bottom of the home screen —
+  put it in the request (§3). Ask only for what only they know: **the age range** and **a
+  one- or two-sentence description** if `meta.description` is missing (AskUserQuestion, simple);
+  write the answer in `meta.description` (+ its translation in `game.i18n.js`) so a later
+  update reuses it instead of asking again.
 - Child safety items (tracker, external link, form, camera…) → remove them; explain in one
   sentence that Ludea games for children can't contain them.
-- Engine-layer drift → run **report-upstream** first (the reviewer will see it otherwise).
-- The game must be **live** (GitHub Pages) and the repo **public**.
+- Engine-layer drift (`upstream.cjs context` → `driftUnreported`, which already leaves out
+  files Ludea has) → a real local change: run **report-upstream** first (the reviewer will see it
+  otherwise). Files listed only in `drift.behind` are just an older/newer copy of Ludea's engine
+  (an engine update is available): fine to submit — offer **update** first if they like, and
+  mention it in the readiness report.
+- The game must be **live** (GitHub Pages) and the repo **public**. Its address is
+  `upstream.cjs context` → `pagesUrl`: `https://<owner>.github.io/<repo>/` for a creator's own
+  repo (only `ludea-ai/*` repos live at `https://ludea.ai/<repo>/`) — check it answers 200.
 - **Author** (shown on the catalogue card as « par … » / "by …", linked to GitHub): fill it
   AUTOMATICALLY from the repo — `node .claude/skills/_shared/upstream.cjs author` (owner + human
   contributors, real names from their commits; bots and Claude left out). Write it in
@@ -66,7 +90,7 @@ Title: `[publish] <Game title> — <owner/repo>` (first publication) or
 <!-- publish v1 kind=<publish|update> repo=<owner/repo> commit=<HEAD sha> previous=<reviewedCommit or none> engine=<engine version> -->
 ### Game
 - **Title:** … · **Repo:** https://github.com/<owner/repo> · **Live:** <pages url>
-- **Commit submitted:** <sha>   (the review covers exactly this version)
+- **Commit submitted:** <sha> · **Build:** v<N> (bottom of the home screen)   (the review covers exactly this version)
 - **Age:** <minAge>–<maxAge> · **Languages:** <fr + en> · **Content notes:** <audience.notes>
 ### Description (catalogue card)
 - **EN:** <one or two sentences> 
@@ -87,7 +111,9 @@ Title: `[publish] <Game title> — <owner/repo>` (first publication) or
 ```
 Route: GitHub MCP `issue_write` → `gh issue create -R ludea-ai/ludea-ai.github.io` → prefilled link
 (`upstream.cjs url --repo ludea-ai/ludea-ai.github.io …`). Log it:
-`upstream.cjs log --add publish:<sha> --issue <url>`.
+`upstream.cjs log --add publish:<sha> --issue <url>`, and commit `.claude/upstream-log.json`.
+That commit comes **after** the submitted sha and is expected: it only touches the log (not the
+game), so HEAD ≠ submitted commit is normal — the review uses the sha in the request.
 
 ## 4. Tell the creator — plain words
 « Ta demande est envoyée (lien). L'équipe Ludea va vérifier ton jeu — surtout qu'il est bien

@@ -11,8 +11,11 @@ their game). Two lists per version:
 ## next (pending owner's OK)
 ### New — you can switch it on
 - **Legal links at the bottom of the help screen** (legal notice, privacy), small and out of the way of young players — `meta.legalLinks: [{ label, url }]` — every game published on a website (Ludea's catalogue copies get Ludea's links).
+- **A short description of the game for the Ludea catalogue card**, written once and reused by every update — `meta.description` — any game you publish on ludea.ai.
 ### Better — automatic
 - Web addresses and the author's name are no longer treated as texts to translate.
+- No more false « engine changes not reported » warnings: files that Ludea already has, or that are just an older/newer copy of Ludea's engine, are no longer counted (they show as « update available »).
+- `/publish`, `/idea` and engine reports ask you first whether to send the request themselves or give you a ready-filled link, and `/publish` gives the right web address and build number.
 - You are told when a newer engine exists (what it brings), and when your catalogue version is behind your game; `/update`, `/publish` (first publication or update), `/idea`.
 
 ## 2026-10-18.9

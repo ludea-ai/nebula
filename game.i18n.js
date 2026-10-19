@@ -6,6 +6,7 @@ window.GAME_I18N.fr = {
   "Nebula Nursery": "Crèche Nébula",
   "Nebula": "Nébula",
   "Look after the little glowing critters!": "Prends soin des petites bestioles lumineuses !",
+  "Care for glowing alien critters on a space station: feed them, raise their babies, ride them through the asteroid belt and deliver parcels across the Star Ring.": "Prends soin de bestioles extraterrestres lumineuses sur une station spatiale : nourris-les, élève leurs bébés, chevauche-les à travers la ceinture d’astéroïdes et livre des colis tout autour de l’Anneau stellaire.",
   "Legal notice": "Mentions légales",
   "Privacy": "Confidentialité",
   "Name your nursery:": "Nomme ta crèche :",

@@ -33,10 +33,11 @@ else {
   catch (e) { B("game.config.js does not evaluate: " + e.message); }
 }
 const M = (G && G.meta) || {};
-info.title = M.title; info.tagline = M.tagline; info.lang = M.lang; info.audience = M.audience;
+info.title = M.title; info.tagline = M.tagline; info.description = M.description; info.lang = M.lang; info.audience = M.audience;
 if (G) {
   if (!M.title) B("meta.title missing (the game's name)");
   if (!M.tagline) B("meta.tagline missing (one-line description shown in the catalogue)");
+  if (!M.description) W("meta.description missing — 1-2 sentences for the catalogue card (asked once, then reused by every re-submission)");
   const a = M.audience || {};
   if (typeof a.minAge !== "number") B("meta.audience.minAge missing — the catalogue needs the target age");
   else if (a.minAge < 3) W("meta.audience.minAge < 3 — the engine's games are designed for 5+");
@@ -121,10 +122,11 @@ const up = path.join(DIR, ".claude/skills/_shared/upstream.cjs");
 if (fs.existsSync(path.join(DIR, ".claude/skills/_shared/engine-manifest.json"))) {
   try {
     const own = path.join(__dirname, "upstream.cjs"); // trusted copy, run against DIR via cwd-less ROOT? → run the target's only if it is ours
-    const out = cp.execSync(`node ${JSON.stringify(fs.existsSync(up) && DIR === path.resolve(__dirname, "../../..") ? up : own)} drift --json`, { cwd: DIR, encoding: "utf8" });
+    const out = cp.execSync(`node ${JSON.stringify(fs.existsSync(up) && DIR === path.resolve(__dirname, "../../..") ? up : own)} drift --json --upstream --unreported`, { cwd: DIR, encoding: "utf8" });
     const d = JSON.parse(out); const n = d.changed.length + d.added.length + d.removed.length;
     info.engine = d.manifest && d.manifest.version;
-    if (n && DIR === path.resolve(__dirname, "../../..")) W(`engine layer changed in ${n} file(s) — run report-upstream so Ludea gets it (and the next sync doesn't overwrite it)`);
+    if ((d.behind || []).length) info.engineBehind = d.behind.length; // only an older/newer Ludea copy: fine to submit (update first if you like)
+    if (n && DIR === path.resolve(__dirname, "../../..")) W(`engine layer changed in ${n} file(s) not yet reported — run report-upstream so Ludea gets it (and the next sync doesn't overwrite it)`);
   } catch (e) { /* drift exit 2 is fine */ }
 }
 

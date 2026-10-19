@@ -76,6 +76,7 @@ can override only what you want). Texts are in `meta.lang`; translations: see **
 ```
 lang: "en" | "fr" | …,                // source language of every text in this config
 title, titleIcon, logo ("assets/img/logo.png" — big home-screen image), shortName, tagline, saveKey, assetVersion: "vN",
+description,                          // optional: 1–2 sentences for the Ludea catalogue card (source language; translated in game.i18n.js like any text); not shown in-game
 legacySave: { key: "old-key" | ["k1","k2"], migrate: (old) => stateLike },   // see below
 audience: { minAge, notes },          // used by the asset skills' content policy
 author: { name, github, url, contributors: [{ login, name }] }, // credit in the Ludea catalogue (publish, filled from `upstream.cjs author`); not shown in-game
