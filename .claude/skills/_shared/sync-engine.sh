@@ -6,7 +6,8 @@
 # merge. But the engine layer is a known set of files with NO game content (proven by
 # separation-audit), so we just check those paths out of the game and review.
 #
-# Pulls ONLY: engine.js, engine.css, ENGINE.md, .claude/skills/ (incl. _shared tooling).
+# Pulls ONLY: engine.js, engine.css, ENGINE.md, .claude/skills/ (incl. _shared tooling), and
+# removes the engine-layer files the source deleted or renamed.
 # Never touches game content: game.config.js, assets/, index.html, style.css,
 # manifest.webmanifest, README.md, tools/, .claude/settings*.json.
 # Does NOT commit — you review the diff, then commit. Run from the TARGET repo root.
@@ -18,10 +19,11 @@
 #   bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote-name> [ref] [--force]
 #   (a game outside the Ludea organisation updates from https://github.com/ludea-ai/game-engine.git)
 set -euo pipefail
+ORIG_ARGS=("$@")
 FORCE=""; ARGS=(); for a in "$@"; do [ "$a" = "--force" ] && FORCE=1 || ARGS+=("$a"); done; set -- "${ARGS[@]}"
 SRC="${1:?usage: sync-engine.sh <game-git-url|remote-name> [ref=main]}"
 REF="${2:-main}"
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"; cd "$ROOT"
+ROOT="${SYNC_ENGINE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"; cd "$ROOT"
 
 # Safety: refuse on a dirty tree so the review diff is unambiguous.
 if [ -n "$(git status --porcelain)" ]; then
@@ -49,9 +51,37 @@ trap cleanup EXIT
 echo "Fetching $REMOTE ($REF)…"
 git fetch --depth=1 "$REMOTE" "$REF"
 
+# Run the SOURCE's version of this script when it differs from ours, so a fix to the sync itself
+# applies on the very update that brings it (not one update later).
+SELF=.claude/skills/_shared/sync-engine.sh
+if [ -z "${SYNC_ENGINE_REEXEC:-}" ] && git cat-file -e "$REMOTE/$REF:$SELF" 2>/dev/null; then
+  NEW="$(mktemp)"; git show "$REMOTE/$REF:$SELF" >"$NEW"
+  if ! cmp -s "$NEW" "$ROOT/$SELF"; then
+    echo "Using the source's newer sync-engine.sh…"; cleanup
+    SYNC_ENGINE_REEXEC=1 SYNC_ENGINE_ROOT="$ROOT" exec bash "$NEW" "${ORIG_ARGS[@]}"
+  fi
+  rm -f "$NEW"
+fi
+
 PATHS=(engine.js engine.css ENGINE.md .claude/skills)
+# Files this repo got from Ludea (read BEFORE the checkout replaces the manifest).
+MAN=.claude/skills/_shared/engine-manifest.json
+FROM_LUDEA="$(mktemp)"; IN_SRC="$(mktemp)"
+[ -f "$MAN" ] && node -e 'for (const f of Object.keys(require(process.argv[1]).files || {})) console.log(f)' "$ROOT/$MAN" | sort >"$FROM_LUDEA"
 echo "Pulling engine layer: ${PATHS[*]}"
 git checkout "$REMOTE/$REF" -- "${PATHS[@]}"
+
+# A checkout only adds and updates: remove what the source deleted or renamed (e.g. a renamed
+# skill), so no stale copy stays behind. Only files that came from Ludea (listed in the old
+# manifest) are removed; a file this repo added itself is kept (the drift check above already
+# made sure it is reported).
+git ls-tree -r --name-only "$REMOTE/$REF" -- "${PATHS[@]}" | sort >"$IN_SRC"
+GONE="$(comm -23 "$FROM_LUDEA" "$IN_SRC")"
+if [ -n "$GONE" ]; then
+  echo "Removed upstream (deleted here too):"; echo "$GONE" | sed 's/^/  - /'
+  echo "$GONE" | while read -r f; do if [ -e "$f" ]; then git rm -q -- "$f"; fi; done
+fi
+rm -f "$FROM_LUDEA" "$IN_SRC"
 
 echo; echo "== engine manifest =="; node .claude/skills/_shared/upstream.cjs write-manifest && git add .claude/skills/_shared/engine-manifest.json
 # Creators are told when a newer Ludea engine exists (SessionStart hook, added once; silent in Ludea's repos).

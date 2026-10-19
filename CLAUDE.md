@@ -19,8 +19,8 @@ New games still start **minimal** from `.claude/skills/new-game/references/minim
 Whenever the engine gains a capability, **add it to Nebula too** (it must show everything).
 
 **Ludea organisation** (https://github.com/ludea-ai, see §11): `game-engine` = the GitHub template
-(engine + small starter game) · `nebula` = the showcase, where engine work is developed then synced
-to every repo · `ludea-ai.github.io` = the brand site + games catalogue · the games. Live at `https://ludea.ai/<repo>/`.
+(engine + small starter game) — the engine's home: issues, pull requests, history · `nebula` = the
+showcase and the engine's test bench (every system on) · `ludea-ai.github.io` = the brand site + games catalogue · the games. Live at `https://ludea.ai/<repo>/`.
 
 ## 2. Golden rule
 - **`engine.js` is generic — never put game content in it.** All game data, strings,
@@ -96,18 +96,20 @@ place-scatter, state-migration. Assets: asset-search (content policy via
 ios-pwa-check, release-deploy, **visual-review** (art-check + full-size crops + tour
 screenshots + checklist — mandatory after any art/UI change). **capitalize-learnings** (run after every feature/bugfix:
 fold the learnings back into the engine/skills/docs and audit the separation).
-**sync-engine** (copy the engine layer from the repo where it evolved — normally Nebula —
-into the template and every game).
+**sync-engine** (copy the engine layer from the template into Nebula and every game; it also removes
+the layer files the template deleted or renamed).
 **Ludea loop** (games ↔ engine): **report-upstream** (automatic, after capitalize-learnings: a
 game's engine bugs + engine changes it already made → issues on `ludea-ai/game-engine`),
 **idea** (`/idea`: the creator's own ideas for the engine), **publish**
 (`/publish`: readiness + child-safety check → publication request on the catalogue repo),
 **update** (creators: update their game to the latest template engine; a SessionStart hook,
 `_shared/update-check.cjs`, tells them when one exists — what's new in `_shared/CHANGELOG.md`),
-**triage-upstream** (maintainers, in Nebula: qualify the inbox → one PR the owner approves →
-propagate to the template + catalogue games). Engine fingerprint: `_shared/engine-manifest.json`
+the engine agent (Ludea only, procedure in `ludea-ai/agents` — NOT in the engine, so it never lands
+in a game: qualify the inbox → one PR on `game-engine`, tried on Nebula, the owner says OK →
+propagate to Nebula + catalogue games). Engine fingerprint: `_shared/engine-manifest.json`
 (`upstream.cjs`). Shared tooling in `_shared/` (incl. `separation-audit.cjs`, `prune-assets.cjs`,
-`sync-engine.sh`, `art-check.cjs`, `icon-kit.cjs`, `contact-sheet.py`, `probes/tour.cjs`).
+`sync-engine.sh`, `art-check.cjs`, `icon-kit.cjs`, `contact-sheet.py`, `probes/tour.cjs`, `probes/smoke.cjs`
+(quick check), `game-systems.cjs`, `share-preview.cjs` (link preview card), `publish-check.cjs`).
 
 ## 8. Conventions
 - Engine, config and skills are in **English**. Clear commit messages.
@@ -204,10 +206,11 @@ like a game made by a studio — not a prototype. Concretely:
 ## 10. This game — « Nebula Nursery » (nebula), the showcase
 - All-ages (6+) space nursery that turns on (nearly) every engine system; English source texts +
   French in `game.i18n.js`. Live: https://ludea.ai/nebula/ (port 8099 locally).
-- Engine work happens HERE first (Nebula exercises every system), is probe-tested here
-  (tour, stress, watchdog, race/chase probes, ios-standalone-check), then copied verbatim to
-  `game-engine` (the template) and every game with **sync-engine**. Batch engine syncs: each one
-  redeploys the games the owner may be testing.
+- **The engine's test bench** (owner decision 2026-10-19): the engine lives in `ludea-ai/game-engine`
+  (issues, batch PRs, history); each batch is tried on a LOCAL clone of Nebula (never pushed) before
+  the owner's OK — tour chromium + webkit, i18n --check, the relevant probes — then Nebula receives it
+  from the template with **sync-engine**, like every game. New engine capabilities are still SHOWN
+  here (Nebula's config is updated with the batch).
 - Art: `tools/art/nebula.cjs` — critter() = mascot (world, close-up, icon, logo, splash, sign);
   HIDPI closeup/splash ×2, logo ×2.5, icons ×2, ui ×6, dust/cloth ×3, pen_floor ×1.4, img/sheet ×2;
   camera {fitW:520, fitH:620, min:0.5, max:1.2}. The template's starter art (`tools/art/starter.cjs`
@@ -221,13 +224,16 @@ Layout in https://github.com/ludea-ai (every repo is served at `https://ludea.ai
 - **`game-engine`** — the GitHub template: engine layer + a SMALL starter game (`game.config.js` =
   `.claude/skills/new-game/references/minimal-seed.config.js`, art in `tools/art/starter.cjs`).
   Publishes nothing (no Pages deploy). "Use this template" gives exactly that.
-- **`nebula`** — the full showcase (https://ludea.ai/nebula/). Engine work is developed and
-  probe-tested here (it exercises every system), then synced (`sync-engine`) into the template
-  and every game. Every new engine capability is shown in Nebula.
+- **`nebula`** — the full showcase (https://ludea.ai/nebula/) and the engine's **test bench**: every
+  batch is tried there before the owner's OK, then Nebula receives the engine like every game. Every
+  new engine capability is shown in Nebula.
 - **`ludea-ai.github.io`** — the brand site (https://ludea.ai/): landing EN at `/`, FR at `/fr/`, design
   system at `/design/`, games catalogue, all Ludea brand art (`tools/art/brand.cjs`). When a game
   is added or gains a mode, update its catalogue card there.
 - Games: `dr-smile`, `gta7`, `my-little-stable`.
+- **`agents`** — Ludea's agent system (engine agent, catalogue agent, watchdog): definitions, procedures,
+  heartbeats, install (`/install-agents`) and runbook (`DEPANNAGE.md`). The source of truth of what
+  runs on claude.ai; Ludea-only, never copied into games. Scope rules (Encrine) in its README.
 - The engine layer (engine.js, engine.css, ENGINE.md, vendor/, .claude/skills) is identical in every
   repo. Old `jlrigau.github.io/…` addresses are gone (repos transferred); saves were not migrated
   (owner: fine). Later (not now): load the engine from one place instead of copying it.

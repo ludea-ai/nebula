@@ -55,10 +55,11 @@ the config). Exit 0 = clean.
    for any new skill.
 3. **Look**: run **visual-review** (art-check + tour screenshots + checklist) whenever art
    or UI changed — and add any new defect class you discovered to its checklist.
-4. **Report upstream**: in a game repo (not `ludea-ai/nebula` / `ludea-ai/game-engine`), every
+4. **Report upstream**: in a game repo (not `ludea-ai/game-engine` / `ludea-ai/nebula`), every
    learning that belongs to the engine layer — an engine/skill/tooling change made here, or a
    failure of a skill/tool/doc you hit — goes back to Ludea with **report-upstream** (automatic,
-   silent, de-duplicated). In Nebula you ARE upstream: the change ships through sync-engine.
+   silent, de-duplicated). In the template you ARE upstream: the change ships in the engine
+agent's batch PR (procedure in `ludea-ai/agents`), tried on Nebula first.
 5. **Engine version**: `node .claude/skills/_shared/update-check.cjs` — if a newer Ludea engine or a
    catalogue update is pending, mention it to the creator in one sentence (update / publish).
 6. **Ship**: hand off to **release-deploy** (bumps `vN`, commits, deploys, verifies).

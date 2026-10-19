@@ -56,6 +56,16 @@ Plus the game's usual QA (they must be green before submitting):
   update reuses it instead of asking again.
 - Child safety items (tracker, external link, form, camera…) → remove them; explain in one
   sentence that Ludea games for children can't contain them.
+- Content items:
+  - **first names** in the texts → ask ONE plain question (« Est-ce que Léa ou Hugo sont de vrais
+    enfants ? ») and replace any real child's name with an invented one;
+  - **well-known characters / brands** (Pikachu, Elsa, Minecraft…) → rename or redraw with the
+    game's own characters;
+  - **photo-format images** → check none is a personal photo (a child, a home, a school);
+    replace it with drawn art otherwise;
+  - **images with no credit line** → add the line (file, source, author, licence) or redraw the
+    image in `tools/art`;
+  - **licence not accepted** (only CC0, public domain, CC BY, CC BY-SA) → replace the asset.
 - Engine-layer drift (`upstream.cjs context` → `driftUnreported`, which already leaves out
   files Ludea has) → a real local change: run **report-upstream** first (the reviewer will see it
   otherwise). Files listed only in `drift.behind` are just an older/newer copy of Ludea's engine

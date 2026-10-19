@@ -1,12 +1,26 @@
 # Ludea engine — release notes
 
 What each engine version brings to a game, in plain words (newest first). Written by
-**triage-upstream** for every batch it merges; shown to creators by `update-check.cjs` (at the
+Ludea's engine agent (procedure in `ludea-ai/agents`) for every batch it merges; shown to creators by `update-check.cjs` (at the
 start of a session) and by **update** (which also suggests which new capabilities fit
 their game). Two lists per version:
 - `### New — you can switch it on`: capabilities a game must opt into in its config. One line each:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
+
+## 2026-10-19.3
+### New — you can switch it on
+- **A nice card when someone shares your game's link** (its picture, its name and its one-line
+  description in iMessage, WhatsApp, Slack…) — `node .claude/skills/_shared/share-preview.cjs`
+  (release-deploy now runs it at every release) — every game.
+### Better — automatic
+- **Updating cleans up**: the engine files Ludea removed or renamed are removed from your game too
+  (no more two commands for the same thing after a rename).
+- **/publish checks more, for children's safety**: first names that could be a real child's, famous
+  characters or brands, photos, and every image must have a credit line with an accepted licence
+  (CC0, public domain, CC BY, CC BY-SA — never "no derivatives" or "non-commercial").
+- **A quick check of the game after an update** (a few seconds: it loads, the world moves, a tap
+  works, the help opens) — `probes/smoke.cjs`.
 
 ## 2026-10-19.2
 ### New — you can switch it on

@@ -165,6 +165,8 @@ short screen) before anything else in this step.
   new game's repo (via the GitHub API / `gh repo edit --add-topic`). There's no API to
   list repos generated from a template, so this topic is how the template later finds its
   games to harvest learnings (see **sync-engine**).
+- **Share preview** for the new game's address: `node .claude/skills/_shared/share-preview.cjs`
+  (after the git remote exists; it replaces the template's card) — look at `assets/share.jpg`.
 - **report-upstream**: send back to Ludea what this creation taught (skill steps that were
   wrong, tooling failures, engine changes made for this game) — silently, no question asked.
 - **Turn GitHub Pages on BEFORE the first push to `main`** (a repo made with "Use this template"

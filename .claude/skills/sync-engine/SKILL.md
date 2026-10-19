@@ -11,10 +11,11 @@ because the **engine layer is cleanly separated** (proven by `separation-audit.c
 a known set of files with **zero game content**, so they port across unrelated repos.
 
 > **Direction:** runs in the repo to **update**, pulls FROM the repo where the engine evolved.
-> In the Ludea organisation engine work is developed and probe-tested in the showcase
-> (`ludea-ai/nebula`, it exercises every system), then synced from Nebula into the template
-> (`ludea-ai/game-engine`) and every game; the engine layer is identical everywhere. A
-> learning made in a game goes the other way first (game → Nebula), then out to the rest.
+> In the Ludea organisation the engine lives in the template (`ludea-ai/game-engine`: issues,
+> pull requests, history); each batch is tried on the showcase (`ludea-ai/nebula`, it exercises
+> every system) before it is merged, then synced from the template into Nebula and every game;
+> the engine layer is identical everywhere. A learning made in a game goes the other way first
+> (game → an issue on the template), then out to the rest.
 > (The `capitalize-learnings` skill is what put each learning into the engine layer in the
 > first place — this skill spreads it.)
 
@@ -52,17 +53,20 @@ node .claude/skills/_shared/separation-audit.cjs && node --check engine.js
 version (`YYYY-MM-DD.N`). `sync-engine.sh` rewrites it after each sync, so every repo knows
 which engine it runs and `node .claude/skills/_shared/upstream.cjs drift --upstream` lists what
 it changed locally that Ludea doesn't have. The script **refuses to sync over such changes**
-(they would be lost): run **report-upstream** first, then `--force`. In Nebula, run
+(they would be lost): run **report-upstream** first, then `--force`. In the template, run
 `upstream.cjs write-manifest` before committing any engine-layer change.
 Games outside the Ludea organisation update from the template:
 `bash .claude/skills/_shared/sync-engine.sh https://github.com/ludea-ai/game-engine.git main`.
-Inside Ludea, merged engine batches are propagated by **triage-upstream** (phase A).
+Inside Ludea, merged engine batches are propagated by the engine agent (procedure in
+`ludea-ai/agents`, phase A — not in the engine, so it never lands in a game).
 
 ## 3. Routine harvest (after bootstrap)
 ```bash
 bash .claude/skills/_shared/sync-engine.sh <game-git-url|remote> [ref]
 ```
-It refuses on a dirty tree, fetches, checks out **only** the engine-layer paths, runs the
+It refuses on a dirty tree, fetches, checks out **only** the engine-layer paths, **removes the
+engine-layer files the source deleted or renamed** (only those this repo got from Ludea — listed
+in its engine manifest; a file the repo added itself is kept), runs the
 separation audit + `node --check`, and stops **without committing** so you review
 `git diff --cached`. Then:
 1. Resolve overlaps if several games touched `engine.js` differently — **one game at a

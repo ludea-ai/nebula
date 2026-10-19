@@ -7,7 +7,7 @@ description: Report back to the Ludea engine, AUTOMATICALLY and without asking t
 
 A game made from the template lives in its **own repo**: whatever it fixes or adds to the
 engine stays there unless it is reported. This skill sends it back to the **engine inbox**
-(`ludea-ai/game-engine` issues), where the maintainers' **triage-upstream** agent qualifies
+(`ludea-ai/game-engine` issues), where the maintainers' engine agent qualifies
 it, integrates it in Nebula, and propagates it to the template and every catalogue game.
 
 ## 0. Should it run here?

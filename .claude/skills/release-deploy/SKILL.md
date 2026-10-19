@@ -23,6 +23,12 @@ Cleanly publish a change to production.
    node .claude/skills/_shared/bump-version.mjs
    ```
    (Skip if you only touched `.claude/` or docs.)
+   Then the **share preview** (the card a shared link shows in iMessage / WhatsApp: image +
+   "Ludea – <title>" + tagline) — it only re-renders when the splash, logo, title or tagline changed:
+   ```bash
+   node .claude/skills/_shared/share-preview.cjs        # writes assets/share.jpg + the tags in index.html
+   ```
+   Look at `assets/share.jpg` when it changed (title readable, logo not cut).
 3. **Verify** — Bash: `node --check engine.js && node --check game.config.js`, the
    separation audit, `art-check.cjs`, and the regression tour (`probes/tour.cjs`, errors
    must be empty). If art/UI changed, **visual-review** must have been done.

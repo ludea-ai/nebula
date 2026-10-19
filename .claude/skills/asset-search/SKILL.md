@@ -24,8 +24,13 @@ From a **description** ("a stone fountain", "a grey companion", "a white fence",
    - **Content suitability** for the game's declared audience (`GAME.meta.audience`
      if set). Reject anything unsuitable for that audience or off-theme. The stricter
      the audience (e.g. young children), the more conservative the bar.
-   - **License**: only permissive, attributable licenses (CC0 / CC-BY / CC-BY-SA /
-     OGA-BY / GPL). Note author + license + URL.
+   - **License — the accepted list, nothing else**: **CC0**, **public domain**, **CC BY**,
+     **CC BY-SA** (any version). Refuse everything else, in particular **ND** (NoDerivatives:
+     we crop, recolour and slice), **NC** (NonCommercial), GPL/OGA-BY variants you can't map to
+     the list, "free for personal use", "all rights reserved", or no licence stated. Read the
+     licence on the asset's own page: search filters lie (Openverse's
+     `license_type=commercial` still returns **CC BY-ND**). Note author + exact licence + URL.
+     `publish-check.cjs` re-reads every line of `assets/CREDITS.md` against this list.
    - **When in doubt → don't propose it.** One safe option beats three doubtful ones.
 4. **Propose** via **AskUserQuestion** a list of 2-3 candidates (all verified), each
    with: short description, **preview** (already looked at), source/URL, author,

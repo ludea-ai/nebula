@@ -34,8 +34,10 @@ Integrate a chosen asset end-to-end (output of **asset-search**), or a generated
    - creature variant → **add-creature-variant** (`GAME.creature.variants`)
    - character → **add-character** (`GAME.characters`)
    - fixed/obstacle element → place it + **add-collision** if needed.
-5. **Update attribution**: add a line in `assets/CREDITS.md` (asset, source/URL,
-   author, **license**). Procedurally-generated assets are your own (note CC0).
+5. **Update attribution**: add a line in `assets/CREDITS.md` naming the FILE(S) (path or
+   `name_*.webp` pattern), the source URL, the author and the exact **licence** (CC0, public
+   domain, CC BY or CC BY-SA only). Procedurally-generated assets are your own (note CC0).
+   `publish-check.cjs` flags every image no credit line covers.
 6. **Verify**: **test-debug** (the image loads, no error) then **map-verify** if visible.
 
 ## Guard-rails

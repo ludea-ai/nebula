@@ -7,7 +7,10 @@
 //
 // Static part: catalogue fields (title, tagline, audience age, language + translation, app
 // icons, README, credits), forbidden/risky code in the GAME files (external links, network
-// calls, trackers, forms, camera/micro/location, iframes…), engine layer changed but not reported.
+// calls, trackers, forms, camera/micro/location, iframes…), content (first names that could be a
+// real child's, well-known characters/brands, photo-format images), every image covered by a
+// credit line or drawn by tools/art, licences in the accepted list (CC0, public domain, CC BY,
+// CC BY-SA — never ND/NC), engine layer changed but not reported.
 // Runtime part (Chromium): loads the game, starts it, plays a few seconds and records every
 // request to ANOTHER origin (must be none) + page errors; screenshots home + world.
 // Exit 0 = ready, 1 = blocking problems, 2 = warnings only.
@@ -75,6 +78,7 @@ else {
   if (/(unknown|inconnu|\?\?\?)/i.test(cr)) W("assets/CREDITS.md mentions an unknown origin/licence");
 }
 if (!exists("index.html")) B("index.html missing");
+else if (!/<!-- ludea:share/.test(rd("index.html"))) W("no share preview — a shared link shows no image/title: run share-preview.cjs (release-deploy does)");
 
 // ---------- 2. Risky content in the GAME files (the engine layer is reviewed upstream)
 // The engine shell's own name field (#place-name-input: a name for the place, max 20 chars, kept on the
@@ -116,6 +120,82 @@ const scripts = [...idx.matchAll(/<script[^>]*src\s*=\s*["']([^"'?]+)/gi)].map((
 const okScripts = ["vendor/phaser.min.js", "game.config.js", "game.i18n.js", "engine.js"];
 scripts.filter((s) => !okScripts.includes(s.replace(/^\.\//, ""))).forEach((s) => W("index.html loads an unexpected script: " + s));
 if (/<script(?![^>]*src)[^>]*>[\s\S]*?\S[\s\S]*?<\/script>/i.test(idx)) info.inlineScript = true;
+
+// ---------- 2b. Content: personal data, copied content, image origin + licences
+// The texts players see (config + translations + shell) and every image the game ships.
+const TEXT = ["game.config.js", "game.i18n.js", "index.html"].map((f) => rd(f) || "").join("\n");
+const strings = [...TEXT.matchAll(/"((?:[^"\\]|\\.){2,})"|'((?:[^'\\]|\\.){2,})'|`([^`]{2,})`|>([^<>]{2,})</g)]
+  .map((m) => m[1] || m[2] || m[3] || m[4]).filter((t) => /[A-Za-zÀ-ÿ]{2}/.test(t) && !/^[\w./:-]+\.(webp|png|jpe?g|svg|js|css)$/.test(t));
+const words = strings.join(" \n ");
+info.authorName = (M.author || {}).name;
+// Real children's first names: common French / English first names in the texts (players see them).
+// A warning: the reviewer asks the creator — a creature called "Lucas" is fine, a classmate is not.
+const FIRST_NAMES = ("Emma Léa Louise Alice Chloé Inès Jeanne Lina Mila Anna Julia Zoé Léna Manon Camille Lou Romane Sarah Eva " +
+  "Nina Juliette Adèle Margaux Clara Léonie Charlotte Lucie Mathilde Agathe Elena Gabrielle Lola Mia Maëlys Lisa Victoria " +
+  "Gabriel Louis Raphaël Jules Adam Lucas Léo Hugo Arthur Nathan Liam Ethan Paul Sacha Tom Noah Mohamed Aaron Théo Nolan " +
+  "Timéo Mathis Enzo Axel Antoine Maël Gaspard Baptiste Clément Victor Martin Valentin Samuel Noé Isaac Tiago Kylian " +
+  "Olivia Amelia Isla Ava Sophia Grace Lily Freya Emily Ivy Ella Isabella Poppy Evie Harper Sienna Willow Daisy Matilda " +
+  "Oliver George Noah Arthur Muhammad Leo Harry Oscar Archie Henry Theodore Freddie Jack Charlie Thomas Jacob Alfie Finley James William").split(" ");
+const namesFound = [...new Set(FIRST_NAMES.filter((n) => new RegExp(`(^|[^\\p{L}])${n}([^\\p{L}]|$)`, "u").test(words)))]
+  .filter((n) => !(info.authorName || "").includes(n));
+info.firstNames = namesFound;
+if (namesFound.length) W(`first names in the game's texts: ${namesFound.slice(0, 12).join(", ")} — make sure none is a real child's name (a pet name is fine)`);
+// Copied content: well-known characters / brands (not ours to use; parents and rights holders notice).
+const BRANDS = /pok[ée]mon|pikachu|disney|pixar|minecraft|fortnite|roblox|super mario|nintendo|zelda|harry potter|poudlard|hogwarts|spider-?man|marvel|avengers|batman|reine des neiges|peppa pig|pat'? ?patrouille|paw patrol|barbie|hello kitty|bluey|\blego\b|playmobil|sonic the hedgehog|star wars|\bjedi\b|pac-?man|tetris|angry birds|schtroumpf|smurf|ast[ée]rix|tintin|winnie|mickey|minnie|\bstitch\b|\bsimba\b|\bshrek\b|minions|totoro|naruto|dragon ball|one piece|bob l'[ée]ponge|spongebob|garfield|snoopy|scooby/gi;
+const brands = [...new Set((words.match(BRANDS) || []).map((b) => b.toLowerCase()))];
+info.brands = brands;
+if (brands.length) B(`well-known characters / brands in the texts: ${brands.join(", ")} — Ludea games use their own characters (remove them, or rename)`);
+
+// Images: every one must be covered by a line of assets/CREDITS.md (by name, pattern or folder), or be
+// drawn by the game's own art module; licences must be in the accepted list.
+const IMG = /\.(png|jpe?g|webp|gif|svg|avif)$/i;
+const images = [];
+(function walk(rel) {
+  const abs = path.join(DIR, rel);
+  for (const f of fs.existsSync(abs) ? fs.readdirSync(abs) : []) {
+    if (!rel && /^(\.git|node_modules|\.claude|tools|vendor|upstream)$/.test(f)) continue;
+    const r = rel ? rel + "/" + f : f;
+    if (fs.statSync(path.join(DIR, r)).isDirectory()) walk(r); else if (IMG.test(f)) images.push(r);
+  }
+})("");
+info.images = images.length;
+const credits = rd("assets/CREDITS.md") || "";
+const artFiles = (fs.existsSync(path.join(DIR, "tools/art")) ? fs.readdirSync(path.join(DIR, "tools/art")) : []).filter((f) => /\.c?js$/.test(f));
+const artText = artFiles.map((f) => fs.readFileSync(path.join(DIR, "tools/art", f), "utf8")).join("\n");
+const creditTokens = [...credits.matchAll(/`([^`]+)`/g)].map((m) => m[1].trim());
+const esc = (t) => t.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*");
+const covered = (img) => {
+  const base = img.split("/").pop(), stem = base.replace(/\.[^.]+$/, "");
+  if (credits.includes(base) || credits.includes(stem + ".")) return true;
+  for (const t of creditTokens) {
+    if (!/[*/.]/.test(t)) continue;
+    const re = new RegExp("(^|/)" + esc(t.replace(/^\.?\//, "")) + "$");
+    if (re.test(img) || re.test(base) || (t.endsWith("/") && img.startsWith(t.replace(/^\.?\//, "")))) return true;
+  }
+  // drawn by the game's own art module (it names its output files)
+  if (artText && (artText.includes(base) || artText.includes(stem + ".") || artText.includes(`"${stem}"`) || artText.includes(`'${stem}'`))) return true;
+  const parts = stem.split(/[_-]/), prefix = parts[0], last = parts[parts.length - 1];
+  if (!artText) return false;
+  if (prefix.length >= 3 && new RegExp(`["'\`/]${esc(prefix)}[_-]`).test(artText)) return true;      // "critter_" + colour
+  return parts.length > 1 && last.length >= 3 && artText.includes(`}_${last}.`);                       // `${name}_ride.png`
+};
+const uncovered = images.filter((i) => i !== "assets/share.jpg" && !covered(i)); // share.jpg = splash + logo, by share-preview.cjs
+info.imagesUncovered = uncovered;
+if (uncovered.length) B(`${uncovered.length} image(s) with no credit line (origin + licence) in assets/CREDITS.md and not drawn by tools/art: ${uncovered.slice(0, 10).join(", ")}${uncovered.length > 10 ? "…" : ""}`);
+const photos = images.filter((i) => /\.jpe?g$/i.test(i) && i !== "assets/share.jpg");
+if (photos.length) W(`photo-format images (${photos.slice(0, 6).join(", ")}) — make sure none is a personal photo (a child, a home, a school)`);
+// Licences, line by line: accepted = CC0, public domain, CC BY, CC BY-SA (+ MIT / OFL for code and fonts).
+const OK_LIC = /\bCC0\b|public domain|domaine public|\bCC[- ]?BY(?:[- ]SA)?\b|creativecommons\.org\/(?:licenses\/by(?:-sa)?\/|publicdomain)|\bMIT\b|\bOFL\b|Open Font License/i;
+const BAD_LIC = /\bCC[- ]?BY[- ](?:SA[- ])?(?:NC|ND)\b|\b(?:NC|ND)\b(?=[- ]?\d|\s*licen)|NoDeriv|No[- ]Deriv|NonCommercial|Non[- ]Commercial|pas d'utilisation commerciale|all rights reserved|tous droits r[ée]serv[ée]s|personal use|usage personnel|by-nc|by-nd/i;
+const badLines = [], unlicensed = [];
+for (const line of credits.split("\n")) {
+  if (!/\S/.test(line) || /^\s*#/.test(line)) continue;
+  if (BAD_LIC.test(line)) { badLines.push(line.trim().slice(0, 100)); continue; }
+  const ext = [...line.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((m) => m[1]).filter((h) => !ALLOW_HOST.test(h));
+  if (ext.length && !OK_LIC.test(line)) unlicensed.push(line.trim().slice(0, 100));
+}
+if (badLines.length) B(`licence not accepted (ND / NC / all rights reserved) in assets/CREDITS.md: ${badLines.slice(0, 4).join(" | ")}`);
+if (unlicensed.length) B(`third-party asset without an accepted licence (CC0, public domain, CC BY, CC BY-SA) in assets/CREDITS.md: ${unlicensed.slice(0, 4).join(" | ")}`);
 
 // ---------- 3. Engine layer: changed but not reported upstream?
 const up = path.join(DIR, ".claude/skills/_shared/upstream.cjs");
