@@ -1,11 +1,11 @@
 {
- "version": "2026-10-19.1",
- "from": "ludea-ai/nebula@d5681f5",
+ "version": "2026-10-19.2",
+ "from": "ludea-ai/nebula@03f681f",
  "files": {
   "engine.js": "196fb82ffd2288074d058c1bca1d4bb49eccc919",
   "engine.css": "b2c1e67587bb236949af2a06aef01256effd0646",
   "ENGINE.md": "b471ab574ecee11a3c4d21e96a41e109ce6a036a",
-  ".claude/skills/_shared/CHANGELOG.md": "46e9dc55383ee8696024e9de8686e710ac2941a2",
+  ".claude/skills/_shared/CHANGELOG.md": "e0501aa71677455484a08b5125a5f7ecba537d9b",
   ".claude/skills/_shared/README.md": "ffab4fde00a5965a3a8de56fbb07eca78d19be36",
   ".claude/skills/_shared/art-check.cjs": "f23698b536a5612186666f15eecec64e1af5ea2a",
   ".claude/skills/_shared/bump-version.mjs": "499b8b0f0e94e04a7b34c978af23c6f78e99baca",

@@ -8,7 +8,7 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
-## next (pending owner's OK)
+## 2026-10-19.2
 ### New — you can switch it on
 - **Legal links at the bottom of the help screen** (legal notice, privacy), small and out of the way of young players — `meta.legalLinks: [{ label, url }]` — every game published on a website (Ludea's catalogue copies get Ludea's links).
 - **A short description of the game for the Ludea catalogue card**, written once and reused by every update — `meta.description` — any game you publish on ludea.ai.
