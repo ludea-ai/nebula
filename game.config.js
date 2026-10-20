@@ -35,12 +35,13 @@ window.GAME = {
     saveKey: "nebula-nursery",
     legalLinks: [{ label: "Legal notice", url: "https://ludea.ai/legal/" }, { label: "Privacy", url: "https://ludea.ai/privacy/" }, { label: "Contact", url: "https://ludea.ai/contact/" }],
     audience: { minAge: 6, notes: "all-ages, gentle, cute, no violence" },
-    assetVersion: "v65",
+    assetVersion: "v66",
     theme: { home: "#120c34", play: "#0b1029", closeup: "#1b1150" },
     showCoins: true,
     coinIcon: "shard",                // the currency: star shards
     namePrompt: { label: "Name your nursery:", placeholder: "Starlight Bay" },
     startName: "My Nursery",
+    askPlayerName: false,               // the keeper IS Bolt or Sol: no "Your name" field, the robot keeps its name
     namePromptYou: "Your name",
     avatarPrompt: "Pick your keeper",
     createTitle: "Choose your keeper",

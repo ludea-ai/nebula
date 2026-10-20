@@ -28,7 +28,12 @@ Cleanly publish a change to production.
    ```bash
    node .claude/skills/_shared/share-preview.cjs        # writes assets/share.jpg + the tags in index.html
    ```
-   Look at `assets/share.jpg` when it changed (title readable, logo not cut).
+   Look at `assets/share.jpg` when it changed (title readable, logo not cut, no box around it).
+   And the README's « Play » link must lead to where the game is served (a moved game kept a dead
+   link, game-engine#19) — it rewrites a wrong one, no network:
+   ```bash
+   node .claude/skills/_shared/public-url.cjs --readme --fix
+   ```
 3. **Verify** — Bash: `node --check engine.js && node --check game.config.js`, the
    separation audit, `art-check.cjs`, and the regression tour (`probes/tour.cjs`, errors
    must be empty). If art/UI changed, **visual-review** must have been done.
@@ -58,4 +63,9 @@ Cleanly publish a change to production.
   (or Settings → Pages → Source: GitHub Actions) — then re-run the failed run (`gh run rerun <id>`).
 
 ## Chaining
+**Engine problems noticed along the way are reported now** (game-engine#18): anything wrong in the
+engine layer or its tooling that you noticed during this task — a tool output that looks wrong, a
+file the sync left behind, a missing browser, a doc that misled you — goes to **report-upstream**
+before you tell the creator, even when the task itself succeeded. Never leave it at a mention or a
+link for the creator to click. (In `ludea-ai/*` you ARE upstream: fix it there instead.)
 Last step, after **test-debug** (the feature works) and, for a map change, after **map-verify**.

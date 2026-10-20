@@ -82,6 +82,11 @@ node .claude/skills/_shared/playtest.cjs --engine webkit --device "iPhone 13" --
 - If a functional choice is ambiguous, ask via **AskUserQuestion**.
 
 ## Chaining
+**Engine problems noticed along the way are reported now** (game-engine#18): anything wrong in the
+engine layer or its tooling that you noticed during this task — a tool output that looks wrong, a
+file the sync left behind, a missing browser, a doc that misled you — goes to **report-upstream**
+before you tell the creator, even when the task itself succeeded. Never leave it at a mention or a
+link for the creator to click. (In `ludea-ai/*` you ARE upstream: fix it there instead.)
 Before **map-verify** (map visuals) and **release-deploy** (publish).
 Called by the **feedback-session** orchestrator for each item.
 

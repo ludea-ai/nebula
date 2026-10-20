@@ -70,7 +70,10 @@ section by section:
 - `meta` (title, icons, logo, save key, theme colours, **audience**, UI strings incl.
   `meta.strings` for engine labels, language)
 - `render` (pixelArt:false, vignette, label pills, ambient particles), `audio` (music mood)
-- `world` + `camera`, `assets` (images/sheets), `player` + `characters`
+- `world` + `camera`, `assets` (images/sheets), `player` + `characters` — when the player IS a named
+  hero (a mascot with its own name, not the child themself), set `meta.askPlayerName: false`: the
+  create screen then doesn't ask « Your name » (no child types a real first name) and the hero keeps
+  its `characters[].name`
 - `creature` (label, needs, actions with effects/costs/rewards, variants, customize,
   ride/jump, celebrate, aging, breeding, names, start state) — omit systems not wanted
 - `zones`, `stations`, `economy` + `shop`, `decor`

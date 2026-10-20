@@ -197,6 +197,10 @@ like a game made by a studio — not a prototype. Concretely:
   `--chip-bg` with two ROUND flags and a `--primary` knob that slides behind the active one; a tap
   switches. Owner iterations (don't redo them): text `FR · EN` = invisible; big 40 px flags = too
   big; tiny footer flags = no; flags merged into a split pill = "pas fan" → KEEP this knob toggle. Any new/changed text ships translated (`--check`).
+- **Engine problems found along the way are reported directly** (owner, 2026-10-19): in a game, any
+  defect noticed in the engine layer or its tooling (even while the task succeeds) → run
+  **report-upstream** yourself (`add_repo` ludea-ai/game-engine, then the issue). Never stop at a
+  prefilled link for the owner to click; don't ask when access works. In `ludea-ai/*`, fix it upstream.
 - **Requests are often dictated by voice**: names and creatures can be mis-transcribed (a "petit
   poulpe" — octopus — once arrived as "petit poulet" — chick — and a whole hero was drawn for nothing).
   Before drawing a hero, cross-check the request with the repo name / title, and when a word could be

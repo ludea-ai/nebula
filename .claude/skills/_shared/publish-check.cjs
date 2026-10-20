@@ -117,6 +117,12 @@ else {
   } catch (e) { B("manifest.webmanifest is not valid JSON"); }
 }
 if (!exists("README.md")) W("README.md missing");
+else {
+  // the README's « Play » link must lead to where the game is served (a moved game kept a dead link, game-engine#19)
+  const pl = require("./public-url.cjs").checkReadme(DIR);
+  if (!pl.ok) W(`README.md: the play link (line ${pl.link.line}) points to ${pl.link.url} but the game is served at ${pl.url} — node .claude/skills/_shared/public-url.cjs --readme --fix`);
+}
+info.asksPlayerName = M.askPlayerName !== false; // false: the hero keeps its own name, no child types a first name
 if (!exists("assets/CREDITS.md")) W("assets/CREDITS.md missing — list the origin + licence of every asset");
 else {
   const cr = rd("assets/CREDITS.md");

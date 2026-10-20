@@ -42,14 +42,23 @@ Red → don't publish: fix if it is the game's config; if it is the engine, undo
 (`git checkout -- . && git clean -fd .claude`), **report-upstream** it as a bug, tell the creator
 plainly that the update waits for a fix.
 
-## 4. Put it online and tell
+## 4. Report what looked wrong in the engine
+**Engine problems noticed along the way are reported now** (game-engine#18): anything wrong in the
+engine layer or its tooling that you noticed during this task — a tool output that looks wrong, a
+file the sync left behind, a missing browser, a doc that misled you — goes to **report-upstream**
+before you tell the creator, even when the task itself succeeded. Never leave it at a mention or a
+link for the creator to click. (In `ludea-ai/*` you ARE upstream: fix it there instead.)
+Also make the README's « Play » link lead to where the game is served (a moved game kept a dead
+link, game-engine#19): `node .claude/skills/_shared/public-url.cjs --readme --fix`.
+
+## 5. Put it online and tell
 `node .claude/skills/_shared/bump-version.mjs`, commit (`Engine <version> from the Ludea template`),
 push, check the deploy is green (release-deploy). Then, in their language, 2–3 lines: what is new
 for their game, what was checked, what was NOT (real phone, sound), and the build number to look
 for at the bottom of the home screen. If the game is in the Ludea catalogue, a new
 **/publish** sends the updated version for review.
 
-## 5. Suggest what the game could now do (never switch it on alone)
+## 6. Suggest what the game could now do (never switch it on alone)
 Read the `### New — you can switch it on` lines of every version between the old and the new
 engine (`update-check.cjs --json` → `news`, or `_shared/CHANGELOG.md`). Keep the 1–3 that fit THIS
 game (look at its config: missions? a chase? riding? young players?) and offer them as ideas, in

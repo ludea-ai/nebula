@@ -3,6 +3,7 @@
  * share-preview — the card a link to the game shows when it is shared (iMessage, WhatsApp,
  * Slack, social networks): a 1200×630 image (the home splash + the logo) and the Open Graph /
  * Twitter tags in index.html, written between two markers so the rest of the file is untouched.
+ * The address comes from public-url.cjs (which also checks the README's « Play » link).
  *
  *   node .claude/skills/_shared/share-preview.cjs            # from the game root
  *   node .claude/skills/_shared/share-preview.cjs --url https://example.org/my-game/
@@ -15,7 +16,7 @@
  * inputs (splash, logo, title, tagline) change. Run by release-deploy; checked by publish-check.
  */
 "use strict";
-const fs = require("node:fs"), path = require("node:path"), cp = require("node:child_process"), crypto = require("node:crypto");
+const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto");
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
 const opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
@@ -30,22 +31,16 @@ const desc = M.tagline || M.description || "";
 const lang = M.lang || "en";
 
 function publicUrl() {
-  if (opt("--url")) return opt("--url").replace(/\/?$/, "/");
-  let remote = "";
-  try { remote = cp.execSync("git remote get-url origin", { cwd: ROOT, encoding: "utf8" }).trim(); } catch (e) {}
-  const m = remote.match(/github\.com[/:]([^/]+)\/([^/.]+?)(?:\.git)?$/) || remote.match(/\/git\/([^/]+)\/([^/.]+?)(?:\.git)?$/);
-  if (!m) { console.error("share-preview: cannot tell the game's public address from the git remote — pass --url"); process.exit(2); }
-  const [, owner, repo] = m;
-  if (owner.toLowerCase() === "ludea-ai") return `https://ludea.ai/${repo}/`;
-  if (repo.toLowerCase() === `${owner.toLowerCase()}.github.io`) return `https://${repo.toLowerCase()}/`;
-  return `https://${owner.toLowerCase()}.github.io/${repo}/`;
+  const u = require("./public-url.cjs").publicUrl(ROOT, opt("--url"));
+  if (!u) { console.error("share-preview: cannot tell the game's public address from the git remote — pass --url"); process.exit(2); }
+  return u;
 }
 
 const file = (f) => f && fs.existsSync(path.join(ROOT, f)) ? path.join(ROOT, f) : null;
 const splash = file(M.splash), logo = file(M.logo);
 const hash = crypto.createHash("sha1");
 for (const f of [splash, logo]) hash.update(f ? fs.readFileSync(f) : "none");
-hash.update(title + "\n" + desc);
+hash.update(title + "\n" + desc + "\nrender:2"); // render:N = the card's drawing rules (bump to re-render every game's card)
 const key = hash.digest("hex").slice(0, 10);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -96,18 +91,34 @@ async function render() {
     const browser = await pw.chromium.launch();
     const page = await browser.newPage({ viewport: { width: W, height: H } });
     await page.goto("file://" + tmp, { waitUntil: "load" });
-    // The logo, trimmed to its visible pixels (logos often carry empty margins).
-    if (logo) await page.evaluate(async (src) => {
+    // The logo, trimmed to its fully transparent margins (logos often carry empty margins).
+    // Every pixel with alpha > 0 is kept, so a soft glow or shadow fades out by itself — a cut at
+    // a higher alpha left a faint rectangle on the card (game-engine#17). The logo is SIZED by its
+    // solid part (alpha > 24, as before), so a wide faint glow spills around it instead of
+    // shrinking the drawing.
+    if (logo) await page.evaluate(async ({ src, maxW, maxH }) => {
       const im = new Image(); im.src = src; await im.decode();
       const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
       const x = c.getContext("2d"); x.drawImage(im, 0, 0);
       const d = x.getImageData(0, 0, c.width, c.height).data;
-      let t = c.height, b = 0, l = c.width, r = 0;
-      for (let y = 0; y < c.height; y += 2) for (let k = 0; k < c.width; k += 2) if (d[(y * c.width + k) * 4 + 3] > 24) { if (y < t) t = y; if (y > b) b = y; if (k < l) l = k; if (k > r) r = k; }
-      const o = document.createElement("canvas"); o.width = Math.max(1, r - l + 2); o.height = Math.max(1, b - t + 2);
-      o.getContext("2d").drawImage(c, l, t, o.width, o.height, 0, 0, o.width, o.height);
-      const el = document.getElementById("logo"); el.src = o.toDataURL(); await el.decode();
-    }, "data:image/" + path.extname(logo).slice(1).replace("jpg", "jpeg") + ";base64," + fs.readFileSync(logo).toString("base64"));
+      const all = { t: c.height, b: -1, l: c.width, r: -1 }, solid = { t: c.height, b: -1, l: c.width, r: -1 };
+      const grow = (q, y, k) => { if (y < q.t) q.t = y; if (y > q.b) q.b = y; if (k < q.l) q.l = k; if (k > q.r) q.r = k; };
+      for (let y = 0; y < c.height; y++) for (let k = 0; k < c.width; k++) {
+        const a = d[(y * c.width + k) * 4 + 3];
+        if (a > 0) grow(all, y, k);
+        if (a > 24) grow(solid, y, k);
+      }
+      const full = { t: 0, l: 0, b: c.height - 1, r: c.width - 1 };
+      const A = all.b < 0 ? full : all, S = solid.b < 0 ? A : solid;
+      const o = document.createElement("canvas"); o.width = A.r - A.l + 1; o.height = A.b - A.t + 1;
+      o.getContext("2d").drawImage(c, A.l, A.t, o.width, o.height, 0, 0, o.width, o.height);
+      const sw = S.r - S.l + 1, sh = S.b - S.t + 1, k = Math.min(1, maxW / sw, maxH / sh); // like max-width/max-height: never enlarged
+      const el = document.getElementById("logo");
+      el.style.cssText = `max-width:none;max-height:none;width:${o.width * k}px;height:${o.height * k}px;` +
+        // the solid part stays where the whole logo used to be: the glow overflows, the layout doesn't move
+        `margin:${-(S.t - A.t) * k}px ${-(A.r - S.r) * k}px ${-(A.b - S.b) * k}px ${-(S.l - A.l) * k}px`;
+      el.src = o.toDataURL(); await el.decode();
+    }, { maxW: W * 0.62, maxH: 300, src: "data:image/" + path.extname(logo).slice(1).replace("jpg", "jpeg") + ";base64," + fs.readFileSync(logo).toString("base64") });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(200);
     await page.screenshot({ path: path.join(ROOT, IMG), type: "jpeg", quality: 86 });

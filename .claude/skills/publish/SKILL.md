@@ -63,6 +63,9 @@ Plus the game's usual QA (they must be green before submitting):
 - Content items:
   - **first names** in the texts → ask ONE plain question (« Est-ce que Léa ou Hugo sont de vrais
     enfants ? ») and replace any real child's name with an invented one;
+  - **the player's name** (`info.asksPlayerName: true`: the create screen asks « Your name », kept on
+    the device only) → when the hero is a named character, suggest `meta.askPlayerName: false` so no
+    child types a real first name; otherwise it is fine;
   - **well-known characters / brands** (Pikachu, Elsa, Minecraft…) → rename or redraw with the
     game's own characters;
   - **photo-format images** → check none is a personal photo (a child, a home, a school);

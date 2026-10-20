@@ -8,6 +8,21 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
+## 2026-10-20.1
+### New — you can switch it on
+- **The player is a named hero, not themself**: the creation screen no longer asks « Your name »,
+  the hero keeps its own name (and changes with the chosen character) — `meta.askPlayerName: false`
+  — games whose hero is a mascot; in a children's game, no child types their real first name.
+### Better — automatic
+- **The link preview card** no longer shows a faint box around a logo with a soft glow; every
+  game's card is redrawn at its next release.
+- **The « Play » link of your README** is checked and corrected at every update and release, so it
+  always leads to where the game is really online (`public-url.cjs --readme --fix`); /publish warns
+  about a wrong one.
+- **Problems in the engine are sent to Ludea right away**: the update, release, visual and test steps
+  report any engine problem they notice, directly when the session can reach Ludea — no more link to
+  click.
+
 ## 2026-10-19.5
 ### Better — automatic
 - **Safer tools**: the tools that read your game's settings (translations, link preview, systems map,

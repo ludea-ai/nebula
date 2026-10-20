@@ -93,6 +93,10 @@ theme: { home, play, closeup },        // iOS theme-color per screen
 showCoins,                             // false → hide the coins HUD (no economy)
 showDay, showCreatureCount,            // false → hide the day / creature-count HUD chips (minimal HUD)
 showCapacity,                          // creature count: show "n/cap" vs bare "n". Default auto: "/cap" only when group size can change (breeding / spawn station / capacity shop)
+askPlayerName,                         // false → the player IS a named hero: no "Your name" field on the create screen; the
+                                       // player's name = the chosen character's `name` (follows a change of avatar; a name
+                                       // typed in an older save is replaced on load). Default true (asks). The place-name
+                                       // question on the home screen (namePrompt) is unchanged. Kids' games: no child types a first name.
 coinIcon, namePrompt:{label,placeholder}, startName, namePromptYou, avatarPrompt,
 createTitle, createOkLabel, startLabel, continueLabel, continueHint, helpTitle,
 ageUnit, and, nightMessage, restBlockedHint, neglectMessage, morningMessage,

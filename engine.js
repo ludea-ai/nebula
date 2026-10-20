@@ -329,6 +329,7 @@ function variantId(c) {
 }
 function variantDef(id) { return VARIANTS.find((v) => v.id === id) || VARIANTS[0]; }
 function charDef(id) { return CHARACTERS.find((p) => p.id === id) || CHARACTERS[0]; }
+const ASK_NAME = META.askPlayerName !== false; // false: the player's name is the chosen character's name
 
 /* ===================== Creatures ===================== */
 
@@ -717,6 +718,7 @@ function continueGame() {
   state = s;
   if (!state.player) state.player = { avatar: CHARACTERS[0].id };
   if (!charDef(state.player.avatar) || !CHARACTERS.some((p) => p.id === state.player.avatar)) state.player.avatar = CHARACTERS[0].id;
+  if (!ASK_NAME) state.player.name = charDef(state.player.avatar).name; // a name typed before the option was set is not kept
   if (!state.resources) state.resources = Object.assign({}, ECON.startResources || {});
   if (!state.decors) state.decors = [];
   state.decors = state.decors.filter((d) => d && DECOR.some((x) => x.id === d.id) && typeof d.x === "number");
@@ -936,9 +938,10 @@ function openCreate(player, onValidate) {
     b.innerHTML = iconHTML("arrow"); b.classList.toggle("hidden", !many);
     b.onclick = () => step(i ? 1 : -1);
   });
-  cont.innerHTML = `<div class="avatar-row" id="grp-avatar"></div>
+  // meta.askPlayerName:false — the player IS a named hero: no name field, the hero keeps its own name.
+  cont.innerHTML = `<div class="avatar-row" id="grp-avatar"></div>` + (!ASK_NAME ? "" : `
     <label class="field-label" for="create-name">${esc(META.namePromptYou || L("Your name"))}</label>
-    <input id="create-name" type="text" maxlength="14" placeholder="${esc(META.namePromptYou || L("Your name"))}" value="${esc(pendingPlayer.name || "")}" />`;
+    <input id="create-name" type="text" maxlength="14" placeholder="${esc(META.namePromptYou || L("Your name"))}" value="${esc(pendingPlayer.name || "")}" />`);
   const ga = $("grp-avatar");
   if (!many) ga.classList.add("hidden");
   CHARACTERS.forEach((p) => {
@@ -950,8 +953,8 @@ function openCreate(player, onValidate) {
   });
   draw();
   $("btn-create-ok").onclick = () => {
-    const n = $("create-name").value.trim();
-    pendingPlayer.name = n || pendingPlayer.name || charDef(pendingPlayer.avatar).name;
+    const n = ASK_NAME ? $("create-name").value.trim() : "";
+    pendingPlayer.name = ASK_NAME ? (n || pendingPlayer.name || charDef(pendingPlayer.avatar).name) : charDef(pendingPlayer.avatar).name;
     onValidate();
     if (state) { $("screen-create").classList.add("hidden"); $("screen-game").classList.remove("hidden"); themeColor(TINT_PLAY); buildHud(); refreshHud(); }
   };
