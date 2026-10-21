@@ -87,6 +87,14 @@ if [ -n "$GONE" ]; then
 fi
 rm -f "$FROM_LUDEA" "$IN_SRC"
 
+# The skills this sync changed: a skill read earlier in the session is now out of date
+# (game-engine#23) — whoever runs the sync must invoke them again, not replay them from memory.
+CHANGED_SKILLS="$(git diff --cached --name-only -- .claude/skills | grep '/SKILL\.md$' | sed -E 's#^\.claude/skills/([^/]+)/SKILL\.md$#\1#' | sort -u)"
+if [ -n "$CHANGED_SKILLS" ]; then
+  echo; echo "== skills changed by this sync — invoke them again (Skill tool), never from memory =="
+  echo "$CHANGED_SKILLS" | sed 's/^/  - /'
+fi
+
 echo; echo "== engine manifest =="; node .claude/skills/_shared/upstream.cjs write-manifest && git add .claude/skills/_shared/engine-manifest.json
 # Creators are told when a newer Ludea engine exists (SessionStart hook, added once; silent in Ludea's repos).
 node .claude/skills/_shared/update-check.cjs --install-hook && git add .claude/settings.json 2>/dev/null || true

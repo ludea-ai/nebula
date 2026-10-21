@@ -23,13 +23,13 @@ the docs or the catalogue. Same inbox (`ludea-ai/game-engine` issues), same tria
    (AskUserQuestion), in their words. Never technical.
 4. **Generalise**: rewrite it so it is useful to every game ("let a mission be on foot OR
    riding", not "in Poulpy the turtle…") — keep their game as the example in *Context*.
-5. **Access first**: a game's session usually can't reach `ludea-ai/game-engine` (MCP "repository
-   not configured", `gh` not logged in) — normal for every creator outside Ludea. Ask the ONE
-   question of report-upstream §4 (send it myself with access to the Ludea repo, or a ready-filled
-   link; it will be public), then de-duplicate and file with the chosen route.
+5. **Access first**, exactly as report-upstream §4: try `add_repo` `ludea-ai/game-engine` first;
+   only when it is refused, follow the creator's recorded choice (CLAUDE.md §10 `Upstream reports:`)
+   or ask the ONE question there and record the answer. Then de-duplicate and file.
    **De-duplicate** (GitHub MCP `search_issues` on `ludea-ai/game-engine`, open + closed): if it
    exists, add a comment "+1 from <repo>: <their angle>" instead.
-6. **File it** exactly as report-upstream §3–4 (same body format and marker, `kind=idea|bug`,
+6. **File it** exactly as report-upstream §3–4 (same body format; the marker line from
+   `upstream.cjs marker --kind idea|bug --skill idea`,
    plus a line `Source: creator feedback`), title `[idea] …` / `[bug] …`. Route: MCP → gh →
    prefilled link (`upstream.cjs url`).
 7. **Confirm** in one or two plain sentences, in their language, with the issue link:

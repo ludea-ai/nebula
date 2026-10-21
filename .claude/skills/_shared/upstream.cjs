@@ -20,6 +20,10 @@
 //                                         # after a sync / an engine commit upstream; --from <first commit>
 //                                         # bootstraps a game created before the manifest existed
 //   node .claude/skills/_shared/upstream.cjs author                # the creator, from the repo's GitHub data (for meta.author)
+//   node .claude/skills/_shared/upstream.cjs marker --kind bug|contribution|idea --skill report-upstream|idea
+//                                         # the first line of every issue body sent to Ludea: it names the skill
+//                                         # and the version of its SKILL.md on disk, so an issue written by hand
+//                                         # or from a remembered (stale) copy of the skill shows (game-engine#23)
 //   node .claude/skills/_shared/upstream.cjs url --repo o/r --title T --body-file F
 //                                                                  # prefilled "new issue" link (fallback)
 //   node .claude/skills/_shared/upstream.cjs log --add kind:key --issue URL [--files a,b]
@@ -269,6 +273,14 @@ try {
   else if (cmd === "patch") { const out = rest[0] && !rest[0].startsWith("--") ? rest[0] : undefined; const fl = arg("--files"); const d = patch(out, fl && fl.split(",")); if (!out) process.stdout.write(d); else console.log(`patch → ${out} (${d.length} bytes)`); }
   else if (cmd === "author") console.log(JSON.stringify(author(), null, 1));
   else if (cmd === "write-manifest") writeManifest(arg("--from"));
+  else if (cmd === "marker") {
+    const kind = arg("--kind"), skill = arg("--skill");
+    if (!/^(bug|contribution|idea)$/.test(kind || "") || !/^[a-z-]+$/.test(skill || "")) throw new Error("usage: marker --kind bug|contribution|idea --skill <skill name>");
+    const f = `.claude/skills/${skill}/SKILL.md`;
+    if (!fs.existsSync(path.join(ROOT, f))) throw new Error(`no skill "${skill}" here (${f}) — invoke the skill that files the issue`);
+    const man = (drift({}).manifest) || {};
+    console.log(`<!-- ludea-report v1 kind=${kind} game=${repoSlug() || "?"} engine=${man.version || "?"} skill=${skill}@${blob(f).slice(0, 8)} -->`);
+  }
   else if (cmd === "url") {
     const repo = arg("--repo") || ENGINE_REPO, title = arg("--title"), bf = arg("--body-file");
     if (!title || !bf) throw new Error("usage: url --repo owner/repo --title T --body-file F");

@@ -57,9 +57,11 @@ environment), every `engine.js` edit, every skill/`_shared` edit made by capital
 
 ## 3. Write each issue (public — keep it clean)
 Title: `[kind] <short, generic description>` (no game name in the title).
-Body (Markdown, **English** — every Ludea issue is in English, whatever the creator's language):
+Body (Markdown, **English** — every Ludea issue is in English, whatever the creator's language).
+Its first line is the marker printed by `node .claude/skills/_shared/upstream.cjs marker --kind <kind>
+--skill report-upstream` (it names this skill's version on disk — never type it by hand):
 ```
-<!-- ludea-report v1 kind=<bug|contribution|idea> game=<owner/repo> engine=<engine version> -->
+<!-- ludea-report v1 kind=<bug|contribution|idea> game=<owner/repo> engine=<engine version> skill=report-upstream@<id> -->
 ### What
 <one paragraph, generic: what is wrong / what the change does>
 ### Where

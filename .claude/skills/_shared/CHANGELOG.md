@@ -8,6 +8,15 @@ their game). Two lists per version:
   **what it lets you do** — `config key` — the kind of game it suits.
 - `### Better — automatic`: fixes and improvements every game gets just by updating.
 
+## 2026-10-21.1
+### Better — automatic
+- **Claude always follows the latest version of each skill**: a request like « mets à jour le moteur »
+  or « envoie cette idée à Ludea » always runs the skill as it is in your game right now, never a
+  copy remembered from earlier; an update lists the skills it changed and re-reads them.
+- **Reports to Ludea say which skill wrote them** (a marker line), so a report written by hand shows.
+- **The Safari check after the close-up is reliable**: it no longer fails when the test browser is
+  slow, and still catches a world that ignores taps.
+
 ## 2026-10-20.1
 ### New — you can switch it on
 - **The player is a named hero, not themself**: the creation screen no longer asks « Your name »,

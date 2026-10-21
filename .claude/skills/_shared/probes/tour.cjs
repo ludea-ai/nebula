@@ -73,12 +73,25 @@ module.exports = async (page) => {
         }
         return worldToScreen(player.x, player.y + 120);
       });
-      await page.mouse.click(tgt.x, tgt.y); await wait(page, 1200);
-      const a2 = await page.evaluate(() => [player.x, player.y]);
-      if (!(Math.hypot(a2[0] - b2[0], a2[1] - b2[1]) > 10)) r.afterCloseupFlags = await page.evaluate((t) => ({ tgt: t, jumpRunning, moveTarget: !!moveTarget, nav: navPath.length,
+      // Headless WebKit can drop to 2-3 fps here (software rendering): judge the TAP, not the walking
+      // speed — the world is responsive if the tap was taken (a walk target / path is set) or the
+      // player moved. A toast can also slide over the point between the pick and the tap: wait for
+      // the canvas to be on top first (game-engine#22).
+      for (let k = 0; k < 6; k++) {
+        const top = await page.evaluate((t) => { const el = document.elementFromPoint(t.x, t.y); return el && el.tagName === "CANVAS"; }, tgt);
+        if (top) break; await wait(page, 500);
+      }
+      const busy = await page.evaluate(() => !!moveTarget || navPath.length > 0 || !!followCreature);
+      await page.mouse.click(tgt.x, tgt.y); await wait(page, 300);
+      const taken = !busy && await page.evaluate(() => !!moveTarget || navPath.length > 0 || !!followCreature);
+      let a2 = await page.evaluate(() => [player.x, player.y]);
+      for (let k = 0; k < 8 && !(Math.hypot(a2[0] - b2[0], a2[1] - b2[1]) > 10); k++) { await wait(page, 500); a2 = await page.evaluate(() => [player.x, player.y]); }
+      const moved = Math.hypot(a2[0] - b2[0], a2[1] - b2[1]) > 10;
+      r.afterCloseupTap = { taken, moved };
+      if (!moved) r.afterCloseupFlags = await page.evaluate((t) => ({ tgt: t, jumpRunning, moveTarget: !!moveTarget, nav: navPath.length,
         closeupOpen, modal: !document.getElementById("modal").classList.contains("hidden"), input: sc.input.enabled, zoomFx, player: [Math.round(player.x), Math.round(player.y)],
         under: (document.elementFromPoint(t.x, t.y) || {}).id || (document.elementFromPoint(t.x, t.y) || {}).tagName, fps: Math.round(game.loop.actualFps) }), tgt);
-      check(Math.hypot(a2[0] - b2[0], a2[1] - b2[1]) > 10, "world unresponsive after the close-up");
+      check(moved || taken, "world unresponsive after the close-up");
       r.spots = s1.total; r.coinsGained = (await page.evaluate(() => state.coins)) - coins0;
     }
   }

@@ -27,7 +27,10 @@ git status --porcelain            # must be clean (commit the game's work first)
 bash .claude/skills/_shared/sync-engine.sh https://github.com/ludea-ai/game-engine.git main
 ```
 It copies only the engine layer (engine.js, engine.css, ENGINE.md, .claude/skills), never the
-game (config, art, texts). Read `ENGINE.md` / `_shared/CHANGELOG.md` for anything the config
+game (config, art, texts). It lists the **skills it changed** — this one included: from here on,
+**invoke this skill again** (Skill tool) and follow the new version for the remaining steps, and
+invoke every other skill you still have to run; never go on from the copy read before the sync
+(game-engine#23). Read `ENGINE.md` / `_shared/CHANGELOG.md` for anything the config
 must adapt to (renamed option, new required field) and adapt the config if needed.
 
 ## 3. Check the game still works (all must be green)

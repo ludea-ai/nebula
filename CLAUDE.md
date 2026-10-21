@@ -98,6 +98,14 @@ screenshots + checklist — mandatory after any art/UI change). **capitalize-lea
 fold the learnings back into the engine/skills/docs and audit the separation).
 **sync-engine** (copy the engine layer from the template into Nebula and every game; it also removes
 the layer files the template deleted or renamed).
+**Always invoke the skill** (game-engine#23): a request that matches a skill — its slash command,
+its triggers, or the same thing in plain words (« mets à jour le moteur » = **update**, « envoie
+cette idée à Ludea » = **idea**, « mets en ligne » = **release-deploy**) — runs it with the Skill tool
+EVERY time and follows the version on disk. Never replay its steps from memory, not even a copy read
+earlier in the same session: any engine sync can change it (the sync lists the skills it changed).
+A skill that chains another invokes that one too. Having a GitHub tool at hand is never a reason to
+skip **idea** / **report-upstream** / **publish**: every write to `ludea-ai/*` goes through its skill
+(its issue body starts with the marker from `upstream.cjs marker`, which names the skill's version).
 **Ludea loop** (games ↔ engine): **report-upstream** (automatic, after capitalize-learnings: a
 game's engine bugs + engine changes it already made → issues on `ludea-ai/game-engine`),
 **idea** (`/idea`: the creator's own ideas for the engine), **publish**

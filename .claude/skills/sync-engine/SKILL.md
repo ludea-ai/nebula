@@ -68,7 +68,9 @@ It refuses on a dirty tree, fetches, checks out **only** the engine-layer paths,
 engine-layer files the source deleted or renamed** (only those this repo got from Ludea — listed
 in its engine manifest; a file the repo added itself is kept), runs the
 separation audit + `node --check`, and stops **without committing** so you review
-`git diff --cached`. Then:
+`git diff --cached`. It also lists the **skills it changed**: invoke them again (Skill tool) for
+anything still to do in this task — never go on from a copy read before the sync (game-engine#23).
+Then:
 1. Resolve overlaps if several games touched `engine.js` differently — **one game at a
    time**, audit + tests after each.
 2. **Show it in the showcase**: when Nebula is the target, upgrade its config to exercise
